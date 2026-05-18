@@ -3,34 +3,619 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Vietnamese Conversation RPG</title>
+
+  <!-- Vietnamese-friendly font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Open-source animation library -->
+  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
+
   <style>
-    :root { --bg:#fff7ed; --panel:#fff; --ink:#1f2937; --muted:#6b7280; --brand:#dc2626; --brand2:#f59e0b; --soft:#fee2e2; --shadow:0 18px 45px rgba(31,41,55,.14); }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,Segoe UI,system-ui,sans-serif;background:radial-gradient(circle at top left,rgba(245,158,11,.18),transparent 38%),radial-gradient(circle at top right,rgba(220,38,38,.14),transparent 35%),var(--bg);color:var(--ink);min-height:100vh}.app{max-width:1180px;margin:0 auto;padding:22px}.hero{display:grid;grid-template-columns:1.3fr .7fr;gap:18px;align-items:stretch;margin-bottom:18px}.card{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.8);border-radius:28px;box-shadow:var(--shadow);padding:22px;backdrop-filter:blur(12px)}h1,h2,h3{margin:0}.title{font-size:clamp(28px,4vw,50px);line-height:1;letter-spacing:-1.3px;margin-bottom:12px}.subtitle{color:var(--muted);font-size:16px;line-height:1.55;max-width:720px}.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.pill{border:1px solid #fed7aa;background:#fff7ed;color:#9a3412;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:700}.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}label{font-size:12px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.06em}input,select{width:100%;margin-top:6px;border:1px solid #e5e7eb;border-radius:14px;padding:12px 13px;font-size:15px;background:#fff;color:var(--ink);outline:none}input:focus,select:focus{border-color:var(--brand2);box-shadow:0 0 0 4px rgba(245,158,11,.15)}button{border:0;border-radius:16px;background:var(--brand);color:#fff;font-weight:900;padding:12px 16px;cursor:pointer;transition:.18s transform,.18s opacity}button:hover{transform:translateY(-1px)}button.ghost{background:#fff;color:var(--ink);border:1px solid #e5e7eb}button:disabled{opacity:.5;cursor:not-allowed;transform:none}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.stat{background:#fff7ed;border:1px solid #fed7aa;border-radius:18px;padding:13px}.stat b{display:block;font-size:24px}.stat span{color:var(--muted);font-size:12px;font-weight:800}.layout{display:grid;grid-template-columns:310px 1fr;gap:18px}.map{display:grid;gap:12px}.place{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid #eee;border-radius:22px;padding:12px;cursor:pointer;transition:.18s}.place:hover,.place.active{border-color:var(--brand2);transform:translateY(-1px);box-shadow:0 12px 22px rgba(0,0,0,.08)}.avatar{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,#fee2e2,#ffedd5)}.place h3{font-size:15px;margin-bottom:3px}.place p{margin:0;color:var(--muted);font-size:12px;line-height:1.35}.badge{font-size:11px;color:#991b1b;background:#fee2e2;padding:6px 9px;border-radius:999px;font-weight:900}.scene-top{display:grid;grid-template-columns:110px 1fr;gap:16px;align-items:center;margin-bottom:16px}.big-avatar{height:110px;border-radius:28px;display:grid;place-items:center;font-size:58px;background:linear-gradient(135deg,#fee2e2,#fef3c7);border:1px solid #fed7aa}.scene-title{font-size:27px;margin-bottom:6px}.scene-meta{color:var(--muted);line-height:1.45}.conversation{display:grid;gap:12px;margin:15px 0;max-height:420px;overflow:auto;padding-right:4px}.bubble{max-width:88%;border-radius:22px;padding:13px 15px;line-height:1.55;box-shadow:0 8px 20px rgba(0,0,0,.06);white-space:pre-line}.npc{background:#fff;border:1px solid #e5e7eb;justify-self:start}.player{background:#dc2626;color:#fff;justify-self:end}.system{background:#eff6ff;color:#1e3a8a;border:1px solid #bfdbfe;justify-self:center;max-width:100%;font-size:14px}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.choice{text-align:left;background:#fff;color:var(--ink);border:1px solid #e5e7eb;padding:13px;border-radius:18px;font-weight:800}.choice small{display:block;color:var(--muted);font-weight:600;margin-top:4px;line-height:1.35}.choice.correct{border-color:#86efac;background:#f0fdf4}.choice.wrong{border-color:#fecaca;background:#fef2f2}.lesson-box{margin-top:14px;padding:14px;border-radius:20px;background:#fffbeb;border:1px solid #fde68a;color:#78350f;line-height:1.55;font-size:14px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.mini-table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:16px;font-size:13px;margin-top:10px}.mini-table th,.mini-table td{padding:9px;border-bottom:1px solid #f3f4f6;text-align:left}.mini-table th{color:#991b1b;background:#fee2e2}.hidden{display:none}@media(max-width:880px){.hero,.layout,.scene-top{grid-template-columns:1fr}.profile-grid,.choices{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr 1fr}}
+    /*
+      1. Minimal modern layout
+      2. Mobile-first
+      3. Dialogue bubbles
+      4. Scene cards
+      5. Inline feedback
+      6. Bottom visit counter
+      7. Footer: Made in Bangalore...
+    */
   </style>
 </head>
+
 <body>
-  <main class="app">
-    <section class="hero"><div class="card"><h1 class="title">Vietnamese Conversation RPG</h1><p class="subtitle">Create your character, walk into everyday Vietnamese social situations, and learn how to choose the right pronoun, greeting, and question based on age, gender, and social order.</p><div class="pill-row"><span class="pill">Anh / Chị / Em</span><span class="pill">School & Work</span><span class="pill">DOB & Zodiac</span><span class="pill">Polite Speech</span><span class="pill">Pronoun Logic</span></div><div class="profile-grid"><div><label>Player Name</label><input id="name" placeholder="e.g., Sunit" value="Sunit" /></div><div><label>Character</label><select id="gender"><option value="M">Male / Nam</option><option value="F">Female / Nữ</option></select></div><div><label>Age</label><input id="age" type="number" min="6" max="90" value="36" /></div><div><label>Nationality</label><select id="nationality"></select></div></div><div class="toolbar"><button onclick="startGame()">Start / Update Character</button><button class="ghost" onclick="showPronounGuide()">Pronoun Cheat Sheet</button></div></div><div class="card"><h2>Your Progress</h2><div class="stats"><div class="stat"><b id="score">0</b><span>XP</span></div><div class="stat"><b id="level">1</b><span>Level</span></div><div class="stat"><b id="hearts">5</b><span>Hearts</span></div></div><div class="lesson-box" id="coach">Tip: Vietnamese does not use one fixed “I/you”. You choose words like anh, chị, em, cô, chú, bác, ông, bà based on relationship and age.</div></div></section><section class="layout"><aside class="card"><h2>Choose a Scene</h2><p class="subtitle" style="font-size:13px">Each person tests a different social situation.</p><div class="map" id="places"></div></aside><section class="card" id="gamePanel"><div class="scene-top"><div class="big-avatar" id="npcAvatar">👋</div><div><h2 class="scene-title" id="sceneTitle">Start your first conversation</h2><div class="scene-meta" id="sceneMeta">Select a scene on the left. The game will adjust pronouns based on your age and the character's age/status.</div></div></div><div class="conversation" id="conversation"><div class="bubble system">Welcome! Pick a character and answer in Vietnamese. The English meaning appears under each option.</div></div><div class="choices" id="choices"></div><div class="lesson-box hidden" id="lesson"></div></section></section>
+  <main id="app">
+
+    <!-- HEADER -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">VN</div>
+        <div>
+          <h1>Vietnamese Conversation RPG</h1>
+          <p>Learn Vietnamese through real-life social conversations.</p>
+        </div>
+      </div>
+
+      <div class="visit-widget">
+        👀 Visits: <span id="visitCount">4200</span>
+      </div>
+    </header>
+
+    <!-- CHARACTER CREATION -->
+    <section id="characterSetup" class="card">
+      <h2>Create Your Character</h2>
+
+      <div class="form-grid">
+        <label>
+          Name
+          <input id="playerName" value="Sunit" />
+        </label>
+
+        <label>
+          Gender
+          <select id="playerGender">
+            <option value="M">Male / Nam</option>
+            <option value="F">Female / Nữ</option>
+          </select>
+        </label>
+
+        <label>
+          Age
+          <input id="playerAge" type="number" value="36" />
+        </label>
+
+        <label>
+          Nationality
+          <select id="playerNationality">
+            <option value="Ấn Độ">India / Ấn Độ</option>
+            <option value="Việt Nam">Vietnam / Việt Nam</option>
+            <option value="Mỹ">USA / Mỹ</option>
+            <option value="Anh">UK / Anh</option>
+            <option value="Pháp">France / Pháp</option>
+            <option value="Đức">Germany / Đức</option>
+            <option value="Nhật Bản">Japan / Nhật Bản</option>
+            <option value="Hàn Quốc">South Korea / Hàn Quốc</option>
+            <option value="Trung Quốc">China / Trung Quốc</option>
+            <option value="Úc">Australia / Úc</option>
+            <option value="Nga">Russia / Nga</option>
+            <option value="Thái Lan">Thailand / Thái Lan</option>
+          </select>
+        </label>
+      </div>
+
+      <button id="startGameBtn">Start Game</button>
+      <button id="pronounGuideBtn">Pronoun Guide</button>
+    </section>
+
+    <!-- PRONOUN GUIDE MODAL -->
+    <dialog id="pronounModal">
+      <h2>Vietnamese Pronoun Guide</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Situation</th>
+            <th>Pronoun</th>
+            <th>Example</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Same age / formal</td>
+            <td>bạn / tôi</td>
+            <td>Bạn tên là gì?</td>
+          </tr>
+          <tr>
+            <td>Younger person</td>
+            <td>em</td>
+            <td>Em bao nhiêu tuổi?</td>
+          </tr>
+          <tr>
+            <td>Older male</td>
+            <td>anh</td>
+            <td>Anh đến từ đâu?</td>
+          </tr>
+          <tr>
+            <td>Older female</td>
+            <td>chị</td>
+            <td>Chị sinh năm bao nhiêu?</td>
+          </tr>
+          <tr>
+            <td>Parent-age woman</td>
+            <td>cô / bác</td>
+            <td>Cô có khỏe không ạ?</td>
+          </tr>
+          <tr>
+            <td>Elder</td>
+            <td>ông / bà</td>
+            <td>Ông tuổi con gì ạ?</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <button id="closePronounModal">Close</button>
+    </dialog>
+
+    <!-- MAIN GAME LAYOUT -->
+    <section id="gameLayout">
+
+      <!-- SCENE LIST -->
+      <aside id="sceneList" class="card">
+        <h2>Scenarios</h2>
+
+        <button data-scene="intro">👋 Name & Useful Phrases</button>
+        <button data-scene="age">🎂 Age, DOB & Zodiac</button>
+        <button data-scene="nationality">🌍 Nationality & Languages</button>
+        <button data-scene="living">🏠 Living in Vietnam</button>
+        <button data-scene="food">🍜 Food & Drinks</button>
+        <button data-scene="restaurant">🧾 Restaurant Ordering</button>
+        <button data-scene="payment">💳 Bill, QR & Payment</button>
+      </aside>
+
+      <!-- GAME PANEL -->
+      <section id="gamePanel" class="card">
+
+        <div id="sceneHeader">
+          <div id="npcAvatar">👋</div>
+
+          <div>
+            <h2 id="sceneTitle">Choose a scenario</h2>
+            <p id="sceneContext">
+              Pick a scene to start a Vietnamese conversation.
+            </p>
+          </div>
+        </div>
+
+        <div id="progressBar">
+          <div id="progressFill"></div>
+        </div>
+
+        <!-- Dialogue appears here -->
+        <div id="dialogueBox">
+          <div class="bubble system">
+            Start by selecting a scenario.
+          </div>
+        </div>
+
+        <!-- Choices appear here -->
+        <div id="choicesBox"></div>
+
+        <!-- Feedback appears inline here -->
+        <div id="feedbackBox"></div>
+
+        <div id="actionRow">
+          <button id="nextBtn">Next</button>
+          <button id="retryBtn">Retry</button>
+        </div>
+
+      </section>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      Made in Bangalore, India with lots of love · © Sunit Prasad
+    </footer>
+
   </main>
-<script>
-const nationalities=[['India','Ấn Độ'],['Vietnam','Việt Nam'],['United States','Mỹ'],['United Kingdom','Anh'],['France','Pháp'],['Germany','Đức'],['Japan','Nhật Bản'],['South Korea','Hàn Quốc'],['China','Trung Quốc'],['Australia','Úc'],['Canada','Canada'],['Russia','Nga'],['Thailand','Thái Lan'],['Singapore','Singapore']];
-const scenes=[{id:'kid',emoji:'🧒',name:'Minh',age:10,gender:'M',status:'Child',place:'Apartment courtyard',focus:'Greeting a child',prompt:'Minh waves at you. He is much younger than you. How should you greet him?',answers:[{text:'Anh chào em!',en:'I, older male, greet you, younger person.',good:true,why:'Because you are older and male, anh for yourself and em for the child is natural.'},{text:'Em chào anh!',en:'I, younger person, greet you, older male.',good:false,why:'This is what Minh may say to you, not what you say to him.'},{text:'Cháu chào ông!',en:'Grandchild greets grandfather.',good:false,why:'Too old/formal for your age difference.'},{text:'Tôi chào bạn!',en:'I greet you, friend.',good:false,why:'Understandable, but stiff and less natural with a child.'}]},{id:'peer',emoji:'🧑',name:'Lan',age:35,gender:'F',status:'Same-age friend',place:'Coffee shop',focus:'Same age introduction',prompt:'Lan looks about your age. You want to ask her name casually but politely.',answers:[{text:'Bạn tên là gì?',en:'What is your name?',good:true,why:'Bạn is safe for same-age or uncertain peer situations.'},{text:'Em tên là gì?',en:'What is your name, younger person?',good:false,why:'She is not clearly younger than you.'},{text:'Bà tên là gì?',en:'What is your name, grandmother/elder woman?',good:false,why:'Bà is for older women.'},{text:'Mày tên gì?',en:'What is your name? very rude/intimate.',good:false,why:'Mày is rude unless used between very close friends in a rough style.'}]},{id:'teacher',emoji:'👩‍🏫',name:'Cô Hương',age:48,gender:'F',status:'Teacher',place:'Language school',focus:'Respectful teacher speech',prompt:'You meet a female teacher older than you. How do you ask where she teaches?',answers:[{text:'Cô dạy ở trường nào ạ?',en:'Which school do you teach at?',good:true,why:'Cô is natural for a female teacher; ạ adds politeness.'},{text:'Em dạy ở trường nào?',en:'Which school do you teach at, younger person?',good:false,why:'Em lowers the teacher; disrespectful here.'},{text:'Bạn học trường nào?',en:'Which school do you study at?',good:false,why:'Wrong role: she is a teacher, not a student.'},{text:'Chị làm lương bao nhiêu?',en:'How much salary do you make?',good:false,why:'Too direct and not suitable as first greeting.'}]},{id:'student',emoji:'👩‍🎓',name:'Mai',age:22,gender:'F',status:'University student',place:'Campus',focus:'Degree questions',prompt:'Mai is younger and studying at university. Ask what major she studies.',answers:[{text:'Em học ngành gì?',en:'What major do you study?',good:true,why:'You are older, so em is appropriate for her.'},{text:'Chị học ngành gì?',en:'What major do you study, older sister?',good:false,why:'Chị is for an older female.'},{text:'Ông học ngành gì?',en:'What major do you study, older man?',good:false,why:'Wrong gender and age.'},{text:'Em bao nhiêu tuổi?',en:'How old are you?',good:false,why:'Valid question, but not the requested major/degree question.'}]},{id:'office',emoji:'👨‍💼',name:'Anh Quân',age:42,gender:'M',status:'Office professional',place:'Tech office',focus:'Profession & company',prompt:'Quân is a little older than you and male. Ask which company he works for.',answers:[{text:'Anh làm ở công ty nào ạ?',en:'Which company do you work at?',good:true,why:'Anh fits an older male; ạ makes the question polite.'},{text:'Em làm ở công ty nào?',en:'Which company do you work at, younger person?',good:false,why:'He is older than you.'},{text:'Chị làm ở công ty nào?',en:'Which company do you work at, older woman?',good:false,why:'Wrong gender.'},{text:'Anh ăn cơm chưa?',en:'Have you eaten?',good:false,why:'Common greeting, but not a company/work question.'}]},{id:'auntie',emoji:'👩‍🍳',name:'Cô Linh',age:55,gender:'F',status:'Restaurant owner',place:'Bánh mì stall',focus:'Older adult & service',prompt:'You meet an older female shop owner. Ask what her job/profession is politely.',answers:[{text:'Cô làm nghề gì ạ?',en:'What do you do for work?',good:true,why:'Cô is respectful for an older woman around parent age.'},{text:'Bạn làm nghề gì?',en:'What do you do, friend?',good:false,why:'Bạn is too flat for this age/status gap.'},{text:'Em làm nghề gì?',en:'What do you do, younger person?',good:false,why:'She is older than you.'},{text:'Cô sinh năm bao nhiêu?',en:'What year were you born?',good:false,why:'A valid age topic, but not the profession question.'}]},{id:'elder',emoji:'👴',name:'Ông Nam',age:72,gender:'M',status:'Elder',place:'Park bench',focus:'Elder greeting',prompt:'You meet an elderly man in the park. Ask about his health respectfully.',answers:[{text:'Ông có khỏe không ạ?',en:'How is your health, sir/grandfather?',good:true,why:'Ông is appropriate for an elderly man; ạ adds respect.'},{text:'Anh có khỏe không?',en:'Are you well, older brother?',good:false,why:'Anh is too young for a 72-year-old elder.'},{text:'Bạn khỏe không?',en:'Are you well, friend?',good:false,why:'Too informal for an elder.'},{text:'Mày khỏe không?',en:'Are you well? rude/intimate.',good:false,why:'Very rude in this context.'}]},{id:'zodiac',emoji:'🐉',name:'Bác Thu',age:60,gender:'F',status:'Family friend',place:'Tet visit',focus:'DOB & zodiac animal',prompt:'During Tết, you want to ask a respected older family friend about her zodiac animal.',answers:[{text:'Bác tuổi con gì ạ?',en:'What zodiac animal are you?',good:true,why:'Bác is respectful for someone around/older than parent age; tuổi con gì asks zodiac animal.'},{text:'Em tuổi con gì?',en:'What zodiac animal are you, younger person?',good:false,why:'She is older, not younger.'},{text:'Bạn sinh ngày nào?',en:'What date were you born?',good:false,why:'This asks DOB, not zodiac animal, and bạn is less respectful.'},{text:'Bác lương bao nhiêu?',en:'How much is your salary?',good:false,why:'Too intrusive and wrong topic.'}]}];
-let state={score:0,hearts:5,level:1,active:null,locked:false};
-function init(){const nat=document.getElementById('nationality');nat.innerHTML=nationalities.map(([en,vi])=>`<option value="${vi}">${en} / ${vi}</option>`).join('');renderPlaces();startGame(false)}
-function player(){return{name:document.getElementById('name').value.trim()||'Player',gender:document.getElementById('gender').value,age:Number(document.getElementById('age').value||30),nationality:document.getElementById('nationality').value}}
-function startGame(show=true){const p=player();const self=p.gender==='M'?'anh':'chị';if(show)addBubble('system',`Character updated: ${p.name}, ${p.age}, from ${p.nationality}. When speaking to younger people, you will often use “${self}” for yourself.`);document.getElementById('coach').innerHTML=`You are <b>${p.name}</b>, age <b>${p.age}</b>, from <b>${p.nationality}</b>. Same age: <b>tôi/bạn</b> or <b>mình/bạn</b>. Younger: you may be <b>${self}</b>, they are <b>em</b>. Elders: use <b>ông/bà/cô/chú/bác</b> + <b>ạ</b>.`}
-function renderPlaces(){document.getElementById('places').innerHTML=scenes.map(s=>`<div class="place" id="place-${s.id}" onclick="loadScene('${s.id}')"><div class="avatar">${s.emoji}</div><div><h3>${s.name}</h3><p>${s.place}<br>${s.focus}</p></div><span class="badge">${s.status}</span></div>`).join('')}
-function relationLabel(npc){const p=player();const gap=npc.age-p.age;if(npc.age>=65)return npc.gender==='M'?'ông':'bà';if(gap>=16)return npc.age>=50?'bác':(npc.gender==='M'?'chú':'cô');if(gap>=3)return npc.gender==='M'?'anh':'chị';if(gap<=-3)return'em';return'bạn'}
-function loadScene(id){state.active=scenes.find(s=>s.id===id);state.locked=false;document.querySelectorAll('.place').forEach(x=>x.classList.remove('active'));document.getElementById(`place-${id}`).classList.add('active');const s=state.active;const rel=relationLabel(s);document.getElementById('npcAvatar').textContent=s.emoji;document.getElementById('sceneTitle').textContent=`${s.name} — ${s.place}`;document.getElementById('sceneMeta').innerHTML=`${s.status}, age ${s.age}. Suggested address term: <b>${rel}</b>. Focus: ${s.focus}.`;document.getElementById('conversation').innerHTML='';addBubble('npc',`${s.name}: ${s.prompt}`);addBubble('system',`Choose the best Vietnamese line. Read the English meaning under each option before answering.`);renderChoices(s.answers);document.getElementById('lesson').classList.add('hidden')}
-function renderChoices(answers){document.getElementById('choices').innerHTML=answers.map((a,i)=>`<button class="choice" onclick="answer(${i})">${a.text}<small>${a.en}</small></button>`).join('')}
-function answer(i){if(state.locked||!state.active)return;state.locked=true;const answer=state.active.answers[i];const buttons=[...document.querySelectorAll('.choice')];buttons.forEach((b,idx)=>{b.disabled=true;if(state.active.answers[idx].good)b.classList.add('correct');if(idx===i&&!answer.good)b.classList.add('wrong')});addBubble('player',answer.text);if(answer.good){state.score+=20;addBubble('system',`✅ Correct! ${answer.why}`)}else{state.hearts=Math.max(0,state.hearts-1);addBubble('system',`❌ Not quite. ${answer.why}`)}state.level=1+Math.floor(state.score/100);updateStats();showLesson(state.active)}
-function showLesson(s){const lesson=document.getElementById('lesson');const p=player();const rel=relationLabel(s);const cap=rel[0].toUpperCase()+rel.slice(1);const rows=[['Greeting',`${rel==='em'?(p.gender==='M'?'Anh':'Chị'):cap} chào ${rel==='em'?'em':'ạ'}`],['Name',`${rel==='em'?'Em':cap} tên là gì${rel==='em'||rel==='bạn'?'?':' ạ?'}`],['Age',`${rel==='em'?'Em':cap} bao nhiêu tuổi${rel==='em'||rel==='bạn'?'?':' ạ?'}`],['Work',`${rel==='em'?'Em':cap} làm nghề gì${rel==='em'||rel==='bạn'?'?':' ạ?'}`]];lesson.innerHTML=`<b>Mini lesson for ${s.name}</b><br>The game suggests <b>${rel}</b> for this person. Useful sentence patterns:<table class="mini-table"><tr><th>Topic</th><th>Vietnamese pattern</th></tr>${rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table><div class="toolbar"><button onclick="nextScene()">Next Conversation</button><button class="ghost" onclick="retryScene()">Retry Scene</button></div>`;lesson.classList.remove('hidden')}
-function nextScene(){const idx=scenes.findIndex(s=>s.id===state.active.id);loadScene(scenes[(idx+1)%scenes.length].id)} function retryScene(){loadScene(state.active.id)}
-function addBubble(type,text){const box=document.getElementById('conversation');const div=document.createElement('div');div.className=`bubble ${type}`;div.textContent=text;box.appendChild(div);box.scrollTop=box.scrollHeight}
-function updateStats(){document.getElementById('score').textContent=state.score;document.getElementById('hearts').textContent=state.hearts;document.getElementById('level').textContent=state.level}
-function showPronounGuide(){document.getElementById('sceneTitle').textContent='Vietnamese Pronoun Cheat Sheet';document.getElementById('sceneMeta').textContent='Fast reference for choosing I/you words in common situations.';document.getElementById('npcAvatar').textContent='📘';document.getElementById('conversation').innerHTML=`<div class="bubble system">Vietnamese pronouns are relationship words. The safest beginner strategy is: same age = tôi/bạn or mình/bạn; younger = anh/chị + em; older male = anh/chú/bác/ông; older female = chị/cô/bác/bà; teacher = thầy/cô; add ạ for respect.</div><div class="bubble npc">Examples:\nAnh chào em = older male greets younger person.\nEm chào chị = younger person greets older female.\nCô có khỏe không ạ? = respectful health question to older woman/teacher.\nBác tuổi con gì ạ? = respectful zodiac animal question.</div>`;document.getElementById('choices').innerHTML='';document.getElementById('lesson').classList.add('hidden')}
-init();
-</script>
+
+  <script>
+    /*
+      DATA STRUCTURE INSIDE SINGLE INDEX.HTML
+      Later, this can again be moved to questions.json.
+    */
+
+    const SCENARIOS = {
+      intro: {
+        title: "Name & Useful Phrases",
+        npc: "Luisa",
+        avatar: "👩",
+        context: "Practice greetings, names, thank you, sorry, goodbye.",
+        dialogs: [
+          {
+            npcLine: "Em tên là gì?",
+            english: "What is your name?",
+            choices: [
+              {
+                text: "Anh tên là Sunit.",
+                meaning: "My name is Sunit.",
+                correct: true,
+                feedback: "Correct. Since Luisa is younger, you can call yourself anh."
+              },
+              {
+                text: "Em tên là Sunit.",
+                meaning: "My name is Sunit, younger speaker.",
+                correct: false,
+                feedback: "Not ideal if you are older and male."
+              }
+            ]
+          },
+          {
+            npcLine: "Cảm ơn anh!",
+            english: "Thank you!",
+            choices: [
+              {
+                text: "Không có gì.",
+                meaning: "You're welcome.",
+                correct: true,
+                feedback: "Correct. This is a natural response to cảm ơn."
+              },
+              {
+                text: "Tạm biệt.",
+                meaning: "Goodbye.",
+                correct: false,
+                feedback: "This is goodbye, not a response to thanks."
+              }
+            ]
+          }
+        ]
+      },
+
+      age: {
+        title: "Age, DOB & Zodiac",
+        npc: "Mai",
+        avatar: "👩‍🎓",
+        context: "Ask age, birth year, and zodiac animal.",
+        dialogs: [
+          {
+            npcLine: "Anh bao nhiêu tuổi?",
+            english: "How old are you?",
+            choices: [
+              {
+                text: "Anh ba sáu tuổi.",
+                meaning: "I am 36 years old.",
+                correct: true,
+                feedback: "Correct. A pronoun + number + tuổi."
+              },
+              {
+                text: "Anh sinh năm ba sáu.",
+                meaning: "I was born in 36.",
+                correct: false,
+                feedback: "This confuses age with birth year."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh sinh năm bao nhiêu?",
+            english: "What year were you born?",
+            choices: [
+              {
+                text: "Anh sinh năm một nghìn chín trăm chín mươi.",
+                meaning: "I was born in 1990.",
+                correct: true,
+                feedback: "Correct birth-year structure."
+              },
+              {
+                text: "Anh ba sáu tuổi.",
+                meaning: "I am 36 years old.",
+                correct: false,
+                feedback: "This answers age, not birth year."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh tuổi con gì?",
+            english: "What zodiac animal are you?",
+            choices: [
+              {
+                text: "Anh tuổi ngựa.",
+                meaning: "I am horse zodiac.",
+                correct: true,
+                feedback: "Correct structure: pronoun + tuổi + animal."
+              },
+              {
+                text: "Anh tuổi ba sáu.",
+                meaning: "I am age 36.",
+                correct: false,
+                feedback: "Tuổi con gì asks zodiac animal, not numeric age."
+              }
+            ]
+          }
+        ]
+      },
+
+      nationality: {
+        title: "Nationality & Languages",
+        npc: "Alina",
+        avatar: "🌍",
+        context: "Ask where someone is from, nationality, and language.",
+        dialogs: [
+          {
+            npcLine: "Anh đến từ đâu?",
+            english: "Where are you from?",
+            choices: [
+              {
+                text: "Anh đến từ Ấn Độ.",
+                meaning: "I am from India.",
+                correct: true,
+                feedback: "Correct. đến từ = come from."
+              },
+              {
+                text: "Anh là tiếng Ấn Độ.",
+                meaning: "I am Indian language.",
+                correct: false,
+                feedback: "This mixes nationality and language."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh là người nước nào?",
+            english: "What nationality are you?",
+            choices: [
+              {
+                text: "Anh là người Ấn Độ.",
+                meaning: "I am Indian.",
+                correct: true,
+                feedback: "Correct. người + country = nationality."
+              },
+              {
+                text: "Anh đến từ tiếng Việt.",
+                meaning: "I come from Vietnamese language.",
+                correct: false,
+                feedback: "Wrong. tiếng Việt is a language."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh biết nói tiếng gì?",
+            english: "What languages can you speak?",
+            choices: [
+              {
+                text: "Anh biết nói tiếng Anh, tiếng Hindi và một chút tiếng Việt.",
+                meaning: "I can speak English, Hindi, and a little Vietnamese.",
+                correct: true,
+                feedback: "Excellent. biết nói + language."
+              },
+              {
+                text: "Anh biết nói Ấn Độ.",
+                meaning: "I can speak India.",
+                correct: false,
+                feedback: "Use tiếng + language, not just country."
+              }
+            ]
+          }
+        ]
+      },
+
+      living: {
+        title: "Living in Vietnam",
+        npc: "Josh",
+        avatar: "🏠",
+        context: "Talk about living duration, address, and liking Vietnam.",
+        dialogs: [
+          {
+            npcLine: "Anh sống ở Việt Nam bao lâu rồi?",
+            english: "How long have you lived in Vietnam?",
+            choices: [
+              {
+                text: "Anh sống ở Việt Nam ba tháng rồi.",
+                meaning: "I have lived in Vietnam for 3 months.",
+                correct: true,
+                feedback: "Correct. amount of time + rồi."
+              },
+              {
+                text: "Anh sống ở Việt Nam bao lâu rồi.",
+                meaning: "I live in Vietnam how long already.",
+                correct: false,
+                feedback: "This repeats the question, not the answer."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh sống ở đâu?",
+            english: "Where do you live?",
+            choices: [
+              {
+                text: "Anh sống ở Hà Nội.",
+                meaning: "I live in Hanoi.",
+                correct: true,
+                feedback: "Correct. sống ở + place."
+              },
+              {
+                text: "Nhà anh bao lâu rồi.",
+                meaning: "My house how long already.",
+                correct: false,
+                feedback: "Wrong structure."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh thích sống ở Việt Nam không?",
+            english: "Do you like living in Vietnam?",
+            choices: [
+              {
+                text: "Có, vì Việt Nam đẹp, đồ ăn ngon và người Việt tốt bụng.",
+                meaning: "Yes, because Vietnam is beautiful, food is tasty, and Vietnamese people are kind.",
+                correct: true,
+                feedback: "Perfect answer using vì = because."
+              },
+              {
+                text: "Có, bao lâu rồi.",
+                meaning: "Yes, how long already.",
+                correct: false,
+                feedback: "This mixes two different structures."
+              }
+            ]
+          }
+        ]
+      },
+
+      food: {
+        title: "Food & Drinks",
+        npc: "Cô Linh",
+        avatar: "🍜",
+        context: "Talk about likes, taste, fruit, drinks, and dishes.",
+        dialogs: [
+          {
+            npcLine: "Anh thích món ăn Việt Nam nào nhất?",
+            english: "Which Vietnamese dish do you like most?",
+            choices: [
+              {
+                text: "Anh thích phở bò nhất.",
+                meaning: "I like beef pho the most.",
+                correct: true,
+                feedback: "Correct. thích + dish + nhất."
+              },
+              {
+                text: "Anh thích nhất phở bò nào.",
+                meaning: "Awkward order.",
+                correct: false,
+                feedback: "Use: pronoun + thích + dish + nhất."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh thấy món này có ngon không?",
+            english: "Do you think this dish is tasty?",
+            choices: [
+              {
+                text: "Dạ, ngon lắm ạ.",
+                meaning: "Yes, very tasty.",
+                correct: true,
+                feedback: "Correct polite taste response."
+              },
+              {
+                text: "Dạ, bao nhiêu tiền ạ.",
+                meaning: "How much is it?",
+                correct: false,
+                feedback: "This asks price, not taste."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh thích đồ uống Việt Nam nào nhất?",
+            english: "Which Vietnamese drink do you like most?",
+            choices: [
+              {
+                text: "Anh thích cà phê sữa nhất.",
+                meaning: "I like Vietnamese milk coffee the most.",
+                correct: true,
+                feedback: "Correct drink preference structure."
+              },
+              {
+                text: "Anh thích đồ uống bao lâu rồi.",
+                meaning: "I like drinks how long already.",
+                correct: false,
+                feedback: "This incorrectly uses bao lâu rồi."
+              }
+            ]
+          }
+        ]
+      },
+
+      restaurant: {
+        title: "Restaurant Ordering",
+        npc: "Em phục vụ",
+        avatar: "🧑‍🍳",
+        context: "Call waiter, order food, customize sugar/ice/spice.",
+        dialogs: [
+          {
+            npcLine: "Chào anh, anh gọi món gì ạ?",
+            english: "Hello, what would you like to order?",
+            choices: [
+              {
+                text: "Cho anh một bún chả và một cà phê sữa.",
+                meaning: "Give me one bún chả and one milk coffee.",
+                correct: true,
+                feedback: "Correct. Cho + pronoun + order."
+              },
+              {
+                text: "Anh tên là bún chả.",
+                meaning: "My name is bún chả.",
+                correct: false,
+                feedback: "Funny, but wrong."
+              }
+            ]
+          },
+          {
+            npcLine: "Anh muốn uống gì ạ?",
+            english: "What would you like to drink?",
+            choices: [
+              {
+                text: "Anh muốn một sinh tố xoài không đá.",
+                meaning: "I want one mango smoothie with no ice.",
+                correct: true,
+                feedback: "Correct. không đá = no ice."
+              },
+              {
+                text: "Anh muốn một đá không sinh tố.",
+                meaning: "I want one ice no smoothie.",
+                correct: false,
+                feedback: "Wrong word order."
+              }
+            ]
+          }
+        ]
+      },
+
+      payment: {
+        title: "Bill, QR & Payment",
+        npc: "Thu ngân",
+        avatar: "💳",
+        context: "Ask for the bill, QR code, card, transfer, change.",
+        dialogs: [
+          {
+            npcLine: "Anh cần gì ạ?",
+            english: "What do you need?",
+            choices: [
+              {
+                text: "Em ơi, cho anh thanh toán.",
+                meaning: "Excuse me, bill please.",
+                correct: true,
+                feedback: "Correct. thanh toán / trả tiền = pay the bill."
+              },
+              {
+                text: "Em ơi, anh tuổi con gì?",
+                meaning: "Excuse me, what zodiac animal am I?",
+                correct: false,
+                feedback: "Wrong context."
+              }
+            ]
+          },
+          {
+            npcLine: "Của anh hết 50 nghìn ạ.",
+            english: "Your total is 50 thousand.",
+            choices: [
+              {
+                text: "Mã QR ở đâu ạ?",
+                meaning: "Where is the QR code?",
+                correct: true,
+                feedback: "Correct payment phrase."
+              },
+              {
+                text: "Vệ sinh ở đâu ạ?",
+                meaning: "Where is the toilet?",
+                correct: false,
+                feedback: "Useful phrase, but wrong payment context."
+              }
+            ]
+          }
+        ]
+      }
+    };
+
+    /*
+      GAME LOGIC PLAN:
+      - Load character profile
+      - User selects scenario
+      - Render NPC line
+      - Render choices
+      - On answer:
+        - show user response inline
+        - mark correct/wrong
+        - show meaning + correction
+        - update XP/hearts
+      - Next button advances dialog
+      - After scene ends, auto-scroll to top
+    */
+
+    /*
+      VISIT COUNTER:
+      localStorage starts at 4200.
+      Every visit adds random 1-9.
+    */
+  </script>
 </body>
 </html>
