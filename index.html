@@ -3,619 +3,1983 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>Vietnamese Conversation RPG</title>
-
-  <!-- Vietnamese-friendly font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- Open-source animation library -->
-  <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
   <style>
-    /*
-      1. Minimal modern layout
-      2. Mobile-first
-      3. Dialogue bubbles
-      4. Scene cards
-      5. Inline feedback
-      6. Bottom visit counter
-      7. Footer: Made in Bangalore...
-    */
+    :root {
+      --bg: #f7f5f0;
+      --surface: rgba(255,255,255,.82);
+      --surface-solid: #ffffff;
+      --ink: #151515;
+      --muted: #707070;
+      --line: rgba(21,21,21,.09);
+      --brand: #111827;
+      --accent: #dc2626;
+      --accent-soft: #fff1f2;
+      --good: #16803c;
+      --good-soft: #ecfdf3;
+      --bad: #dc2626;
+      --bad-soft: #fef2f2;
+      --amber: #a16207;
+      --amber-soft: #fffbeb;
+      --shadow: 0 22px 65px rgba(15,23,42,.08);
+      --radius: 30px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Be Vietnam Pro", "Noto Sans", "Segoe UI", Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 0%, rgba(220,38,38,.10), transparent 28%),
+        radial-gradient(circle at 94% 12%, rgba(161,98,7,.10), transparent 30%),
+        linear-gradient(180deg, #fbfaf7, var(--bg));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image: linear-gradient(rgba(21,21,21,.032) 1px, transparent 1px), linear-gradient(90deg, rgba(21,21,21,.032) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.65), transparent 72%);
+      pointer-events: none;
+    }
+
+    .app { max-width: 1240px; margin: 0 auto; padding: 24px; position: relative; }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+    .logo { display:flex; align-items:center; gap:11px; font-weight:900; letter-spacing:-.045em; }
+    .logo-mark { width:40px; height:40px; border-radius:16px; background:#111827; color:white; display:grid; place-items:center; box-shadow: var(--shadow); }
+    .tiny { font-size:12px; color:var(--muted); font-weight:700; letter-spacing:0; margin-top:2px; }
+
+    .hero { display:grid; grid-template-columns: 1.18fr .82fr; gap:18px; margin-bottom:18px; }
+    .card { background:var(--surface); border:1px solid rgba(255,255,255,.82); border-radius:var(--radius); box-shadow:var(--shadow); backdrop-filter: blur(18px); padding:22px; }
+    .headline { font-size: clamp(34px, 5vw, 68px); line-height:.95; letter-spacing:-.075em; margin:0 0 15px; max-width:780px; }
+    .headline span { color:var(--accent); }
+    .subtitle { margin:0; color:var(--muted); line-height:1.7; font-size:15.5px; max-width:780px; }
+
+    .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:18px; }
+    .chip { border:1px solid var(--line); background:rgba(255,255,255,.7); border-radius:999px; padding:8px 12px; font-size:12px; font-weight:850; }
+
+    .profile-grid { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; margin-top:18px; }
+    label { display:block; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; font-size:11px; font-weight:900; }
+    input, select { width:100%; margin-top:7px; border:1px solid var(--line); background:rgba(255,255,255,.92); color:var(--ink); border-radius:18px; padding:13px 14px; font-size:15px; outline:none; transition:.18s; font-family: inherit; }
+    input:focus, select:focus { border-color:rgba(220,38,38,.45); box-shadow:0 0 0 5px rgba(220,38,38,.08); }
+
+    .toolbar { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    button { border:0; border-radius:18px; padding:12px 15px; background:var(--brand); color:white; font-weight:900; cursor:pointer; transition: transform .18s, opacity .18s, box-shadow .18s; box-shadow:0 12px 25px rgba(17,24,39,.12); font-family: inherit; }
+    button:hover { transform: translateY(-1px); }
+    button.secondary { background:var(--accent); }
+    button.ghost { background:rgba(255,255,255,.88); color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    button:disabled { opacity:.55; cursor:not-allowed; transform:none; }
+
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+    .stat { background:rgba(255,255,255,.74); border:1px solid var(--line); border-radius:22px; padding:15px; }
+    .stat b { font-size:28px; letter-spacing:-.06em; display:block; }
+    .stat span { color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.08em; font-weight:900; }
+    .coach { margin-top:13px; background:var(--amber-soft); border:1px solid rgba(161,98,7,.18); color:#713f12; border-radius:22px; padding:14px; line-height:1.58; font-size:14px; }
+
+    .layout { display:grid; grid-template-columns: 330px 1fr; gap:18px; }
+    .section-title { display:flex; justify-content:space-between; align-items:end; gap:10px; margin-bottom:12px; }
+    h2 { margin:0; letter-spacing:-.04em; }
+
+    .map { display:grid; gap:10px; max-height:650px; overflow:auto; padding-right:3px; }
+    .place { display:grid; grid-template-columns:52px 1fr; gap:12px; align-items:center; padding:12px; border:1px solid var(--line); background:rgba(255,255,255,.68); border-radius:23px; cursor:pointer; transition:.2s; position:relative; overflow:hidden; }
+    .place::after { content:""; position:absolute; inset:auto 12px 12px auto; width:7px; height:7px; border-radius:50%; background:transparent; transition:.2s; }
+    .place:hover, .place.active { background:white; transform: translateY(-2px); box-shadow:0 16px 34px rgba(23,23,23,.08); border-color:rgba(220,38,38,.22); }
+    .place.active::after { background:var(--accent); }
+    .avatar { width:52px; height:52px; border-radius:20px; display:grid; place-items:center; font-size:27px; background:linear-gradient(135deg,#fff1f2,#fffbeb); border:1px solid rgba(220,38,38,.1); }
+    .place h3 { margin:0 0 2px; font-size:14.5px; }
+    .place p { margin:0; color:var(--muted); font-size:12px; line-height:1.38; }
+    .tag { display:inline-block; margin-top:7px; color:#991b1b; background:#fff1f2; border-radius:999px; padding:5px 8px; font-size:10.5px; font-weight:900; }
+
+    .scene { min-height: 650px; }
+    .scene-top { display:grid; grid-template-columns:108px 1fr; gap:16px; align-items:center; margin-bottom:16px; }
+    .big-avatar { height:108px; width:108px; border-radius:32px; display:grid; place-items:center; font-size:58px; background:linear-gradient(135deg,#fff1f2,#fffbeb); border:1px solid rgba(220,38,38,.12); }
+    .scene-title { margin:0 0 7px; font-size:30px; letter-spacing:-.055em; }
+    .scene-meta { color:var(--muted); line-height:1.55; }
+    .progress-line { margin-top: 10px; height: 9px; border-radius: 999px; background: rgba(17,24,39,.08); overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background:#111827; border-radius:999px; transition:.25s; }
+
+    .conversation { display:grid; gap:12px; max-height: 420px; overflow:auto; padding:4px 4px 4px 0; margin:16px 0; }
+    .bubble { max-width:88%; border-radius:24px; padding:14px 16px; line-height:1.6; font-size:15px; white-space:pre-line; border:1px solid var(--line); opacity:0; transform:translateY(8px); }
+    .npc { justify-self:start; background:white; }
+    .player { justify-self:end; background:#111827; color:white; border-color:#111827; }
+    .system { justify-self:center; max-width:100%; background:#f8fafc; color:#334155; font-size:14px; }
+
+    .choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:12px; }
+    .choice { text-align:left; background:white; color:var(--ink); border:1px solid var(--line); box-shadow:none; padding:14px; border-radius:22px; min-height:86px; }
+    .choice small { display:block; color:var(--muted); font-weight:650; line-height:1.42; margin-top:5px; }
+    .choice.correct { border-color:rgba(22,128,60,.32); background:var(--good-soft); }
+    .choice.wrong { border-color:rgba(220,38,38,.3); background:var(--bad-soft); }
+
+    .lesson { margin-top:14px; background:var(--amber-soft); border:1px solid rgba(161,98,7,.17); border-radius:24px; padding:16px; color:#713f12; line-height:1.58; font-size:14px; }
+    .hidden { display:none; }
+    .mini-table { width:100%; border-collapse:separate; border-spacing:0; margin-top:12px; overflow:hidden; border-radius:18px; background:white; }
+    .mini-table th, .mini-table td { padding:10px; border-bottom:1px solid #f3f4f6; text-align:left; vertical-align: top; }
+    .mini-table th { background:#fff1f2; color:#991b1b; font-size:12px; }
+    .mini-table tr:last-child td { border-bottom:0; }
+
+    .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); background:#111827; color:white; padding:13px 16px; border-radius:999px; box-shadow:var(--shadow); opacity:0; pointer-events:none; z-index:40; font-weight:850; }
+
+    .modal-backdrop { position:fixed; inset:0; background:rgba(15,23,42,.42); display:none; align-items:center; justify-content:center; padding:18px; z-index:30; }
+    .modal-backdrop.open { display:flex; }
+    .modal { width:min(900px, 100%); max-height:88vh; overflow:auto; background:white; border-radius:32px; box-shadow:0 30px 90px rgba(0,0,0,.22); padding:24px; opacity:0; transform:translateY(16px) scale(.98); }
+    .modal-head { display:flex; justify-content:space-between; align-items:start; gap:16px; margin-bottom:14px; }
+    .modal h2 { font-size:28px; }
+    .guide-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .guide-card { border:1px solid var(--line); border-radius:22px; padding:15px; background:#fafafa; line-height:1.55; }
+    .guide-card b { display:block; margin-bottom:5px; }
+
+
+
+    /* Tabbed layout for RPG + Food Quiz */
+    .tabbar { display:flex; gap:10px; flex-wrap:wrap; margin: 0 0 18px; position:sticky; top:10px; z-index:12; background:rgba(247,245,240,.70); backdrop-filter: blur(14px); padding:10px; border-radius:24px; border:1px solid rgba(255,255,255,.65); box-shadow:0 10px 28px rgba(15,23,42,.05); }
+    .tab-btn { background:rgba(255,255,255,.90); color:var(--ink); border:1px solid var(--line); box-shadow:none; }
+    .tab-btn.active { background:var(--brand); color:white; border-color:var(--brand); box-shadow:0 12px 25px rgba(17,24,39,.12); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* Food game: bounded cards, clean images, click-to-enlarge */
+    .food-game { margin-top:0; }
+    .food-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+    .food-score { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
+    .food-pill { display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:white; border-radius:999px; padding:8px 12px; font-size:12px; font-weight:850; }
+    .food-stage { display:grid; grid-template-columns: minmax(260px,.72fr) 1fr; gap:18px; align-items:start; }
+    .quiz-visual, .quiz-box { border:1px solid var(--line); background:rgba(255,255,255,.78); border-radius:28px; padding:16px; min-height:190px; overflow:hidden; }
+    .quiz-visual { display:flex; flex-direction:column; align-items:center; justify-content:center; }
+    .quiz-question { margin:0 0 8px; font-size:26px; letter-spacing:-.04em; }
+    .quiz-sub { margin:0 0 14px; color:var(--muted); line-height:1.6; font-size:13px; }
+    .food-options { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:12px; }
+    .food-option { min-height:0; padding:10px; background:white; color:var(--ink); border:1px solid var(--line); box-shadow:none; text-align:left; border-radius:24px; overflow:hidden; }
+    .food-option b { display:block; margin-top:9px; font-size:15px; }
+    .food-option small { display:block; color:var(--muted); line-height:1.42; margin-top:4px; font-weight:650; }
+    .food-option.correct { border-color:rgba(22,128,60,.32); background:var(--good-soft); }
+    .food-option.wrong { border-color:rgba(220,38,38,.3); background:var(--bad-soft); }
+    .food-img-frame { width:100%; aspect-ratio: 4/3; border-radius:18px; overflow:hidden; border:1px solid rgba(21,21,21,.08); background:#f8fafc; display:flex; align-items:center; justify-content:center; position:relative; }
+    .food-img-frame.large { max-width:460px; width:100%; aspect-ratio: 16/10; margin:0 auto; }
+    .food-img-frame img { width:100%; height:100%; object-fit:cover; display:block; transition: transform .2s; }
+    .food-img-frame:hover img { transform:scale(1.025); }
+    .food-img-frame .zoom-btn { position:absolute; right:9px; bottom:9px; width:32px; height:32px; border-radius:999px; display:grid; place-items:center; background:rgba(17,24,39,.82); color:#fff; border:1px solid rgba(255,255,255,.42); box-shadow:0 8px 20px rgba(15,23,42,.18); font-size:15px; line-height:1; cursor:zoom-in; }
+    .food-img-frame .zoom-btn:hover { transform:scale(1.06); background:rgba(220,38,38,.9); }
+    .food-choice-number { display:block; text-align:center; color:var(--muted); font-size:12px; font-weight:900; margin-top:8px; letter-spacing:.06em; text-transform:uppercase; }
+    .img-caption { text-align:center; color:var(--muted); font-size:12px; margin-top:10px; font-weight:800; }
+    .img-fallback { padding:16px; text-align:center; color:#475569; font-weight:850; line-height:1.45; }
+    .image-modal-img { width:100%; max-height:78vh; object-fit:contain; border-radius:24px; background:#f8fafc; }
+
+    @media(max-width: 920px) { .hero, .layout, .scene-top, .food-stage { grid-template-columns:1fr; } .big-avatar { width:100%; } .guide-grid { grid-template-columns:1fr; } }
+    @media(max-width: 640px) { .app { padding:14px; } .profile-grid, .choices, .food-options { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(3,1fr); } .headline { font-size:40px; } .tabbar { top:4px; } }
   </style>
 </head>
-
 <body>
-  <main id="app">
+  <main class="app">
+    <div class="topbar">
+      <div class="logo"><div class="logo-mark">VN</div><div>Conversation RPG<div class="tiny">Pronouns • Greetings • Social order</div></div></div>
+      <button class="ghost" onclick="showPronounGuide()">Pronoun Guide</button>
+    </div>
 
-    <!-- HEADER -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">VN</div>
-        <div>
-          <h1>Vietnamese Conversation RPG</h1>
-          <p>Learn Vietnamese through real-life social conversations.</p>
+    <section class="hero">
+      <div class="card intro-card">
+        <h1 class="headline">Learn Vietnamese by <span>talking to people</span>.</h1>
+        <p class="subtitle">Choose your character, then meet children, students, teachers, professionals, shop owners, and elders. Every scene teaches the right Vietnamese pronoun based on age, gender, respect, and social role.</p>
+        <div class="chips">
+          <span class="chip">anh / chị / em</span><span class="chip">ông / bà / cô / chú / bác</span><span class="chip">school & degree</span><span class="chip">profession</span><span class="chip">DOB & zodiac</span><span class="chip">food image quiz</span><span class="chip">living in Vietnam</span><span class="chip">countries & languages</span>
         </div>
+        <div class="profile-grid">
+          <div><label>Player name</label><input id="name" value="Sunit" placeholder="Your name" /></div>
+          <div><label>Character</label><select id="gender"><option value="M">Male / Nam</option><option value="F">Female / Nữ</option></select></div>
+          <div><label>Age</label><input id="age" type="number" min="6" max="90" value="36" /></div>
+          <div><label>Nationality</label><select id="nationality"></select></div>
+        </div>
+        <div class="toolbar"><button onclick="startGame(true)">Update Character</button><button class="ghost" onclick="showPronounGuide()">Open Pronoun Guide</button><button class="secondary" onclick="switchTab('food'); startFoodGame(true);">Play Food Image Quiz</button></div>
       </div>
-
-      <div class="visit-widget">
-        👀 Visits: <span id="visitCount">4200</span>
+      <div class="card progress-card">
+        <h2>Your Progress</h2>
+        <p class="subtitle" style="font-size:13px">Expanded with name, age, nationalities, living in Vietnam, food, drinks, fruits and taste practice.</p>
+        <div class="stats">
+          <div class="stat"><b id="score">0</b><span>XP</span></div>
+          <div class="stat"><b id="level">1</b><span>Level</span></div>
+          <div class="stat"><b id="hearts">5</b><span>Hearts</span></div>
+        </div>
+        <div class="coach" id="coach"></div>
       </div>
-    </header>
-
-    <!-- CHARACTER CREATION -->
-    <section id="characterSetup" class="card">
-      <h2>Create Your Character</h2>
-
-      <div class="form-grid">
-        <label>
-          Name
-          <input id="playerName" value="Sunit" />
-        </label>
-
-        <label>
-          Gender
-          <select id="playerGender">
-            <option value="M">Male / Nam</option>
-            <option value="F">Female / Nữ</option>
-          </select>
-        </label>
-
-        <label>
-          Age
-          <input id="playerAge" type="number" value="36" />
-        </label>
-
-        <label>
-          Nationality
-          <select id="playerNationality">
-            <option value="Ấn Độ">India / Ấn Độ</option>
-            <option value="Việt Nam">Vietnam / Việt Nam</option>
-            <option value="Mỹ">USA / Mỹ</option>
-            <option value="Anh">UK / Anh</option>
-            <option value="Pháp">France / Pháp</option>
-            <option value="Đức">Germany / Đức</option>
-            <option value="Nhật Bản">Japan / Nhật Bản</option>
-            <option value="Hàn Quốc">South Korea / Hàn Quốc</option>
-            <option value="Trung Quốc">China / Trung Quốc</option>
-            <option value="Úc">Australia / Úc</option>
-            <option value="Nga">Russia / Nga</option>
-            <option value="Thái Lan">Thailand / Thái Lan</option>
-          </select>
-        </label>
-      </div>
-
-      <button id="startGameBtn">Start Game</button>
-      <button id="pronounGuideBtn">Pronoun Guide</button>
     </section>
 
-    <!-- PRONOUN GUIDE MODAL -->
-    <dialog id="pronounModal">
-      <h2>Vietnamese Pronoun Guide</h2>
+    <nav class="tabbar" aria-label="Game sections">
+      <button class="tab-btn active" id="tabBtnConversation" onclick="switchTab('conversation')">🎭 Conversation RPG</button>
+      <button class="tab-btn" id="tabBtnFood" onclick="switchTab('food'); startFoodGame();">🍜 Food Image Quiz</button>
+    </nav>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Situation</th>
-            <th>Pronoun</th>
-            <th>Example</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Same age / formal</td>
-            <td>bạn / tôi</td>
-            <td>Bạn tên là gì?</td>
-          </tr>
-          <tr>
-            <td>Younger person</td>
-            <td>em</td>
-            <td>Em bao nhiêu tuổi?</td>
-          </tr>
-          <tr>
-            <td>Older male</td>
-            <td>anh</td>
-            <td>Anh đến từ đâu?</td>
-          </tr>
-          <tr>
-            <td>Older female</td>
-            <td>chị</td>
-            <td>Chị sinh năm bao nhiêu?</td>
-          </tr>
-          <tr>
-            <td>Parent-age woman</td>
-            <td>cô / bác</td>
-            <td>Cô có khỏe không ạ?</td>
-          </tr>
-          <tr>
-            <td>Elder</td>
-            <td>ông / bà</td>
-            <td>Ông tuổi con gì ạ?</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <button id="closePronounModal">Close</button>
-    </dialog>
-
-    <!-- MAIN GAME LAYOUT -->
-    <section id="gameLayout">
-
-      <!-- SCENE LIST -->
-      <aside id="sceneList" class="card">
-        <h2>Scenarios</h2>
-
-        <button data-scene="intro">👋 Name & Useful Phrases</button>
-        <button data-scene="age">🎂 Age, DOB & Zodiac</button>
-        <button data-scene="nationality">🌍 Nationality & Languages</button>
-        <button data-scene="living">🏠 Living in Vietnam</button>
-        <button data-scene="food">🍜 Food & Drinks</button>
-        <button data-scene="restaurant">🧾 Restaurant Ordering</button>
-        <button data-scene="payment">💳 Bill, QR & Payment</button>
+    <section class="tab-panel active" id="conversationTab">
+    <section class="layout">
+      <aside class="card">
+        <div class="section-title"><div><h2>Scenes</h2><p class="subtitle" style="font-size:13px">Pick a person to talk to.</p></div></div>
+        <div class="map" id="places"></div>
       </aside>
 
-      <!-- GAME PANEL -->
-      <section id="gamePanel" class="card">
-
-        <div id="sceneHeader">
-          <div id="npcAvatar">👋</div>
-
+      <section class="card scene" id="gamePanel">
+        <div class="scene-top">
+          <div class="big-avatar" id="npcAvatar">👋</div>
           <div>
-            <h2 id="sceneTitle">Choose a scenario</h2>
-            <p id="sceneContext">
-              Pick a scene to start a Vietnamese conversation.
-            </p>
+            <h2 class="scene-title" id="sceneTitle">Start your first conversation</h2>
+            <div class="scene-meta" id="sceneMeta">Select a scene on the left. The game will adjust pronouns based on your age and the character's age/status.</div>
+            <div class="progress-line"><div class="progress-fill" id="sceneProgress"></div></div>
           </div>
         </div>
-
-        <div id="progressBar">
-          <div id="progressFill"></div>
+        <div class="conversation" id="conversation">
+          <div class="bubble system" style="opacity:1; transform:none">Welcome! Pick a character and answer in Vietnamese. The English meaning appears under each option.</div>
         </div>
-
-        <!-- Dialogue appears here -->
-        <div id="dialogueBox">
-          <div class="bubble system">
-            Start by selecting a scenario.
-          </div>
-        </div>
-
-        <!-- Choices appear here -->
-        <div id="choicesBox"></div>
-
-        <!-- Feedback appears inline here -->
-        <div id="feedbackBox"></div>
-
-        <div id="actionRow">
-          <button id="nextBtn">Next</button>
-          <button id="retryBtn">Retry</button>
-        </div>
-
+        <div class="choices" id="choices"></div>
+        <div class="lesson hidden" id="lesson"></div>
       </section>
     </section>
+    </section>
 
-    <!-- FOOTER -->
-    <footer>
-      Made in Bangalore, India with lots of love · © Sunit Prasad
-    </footer>
+    <section class="tab-panel" id="foodTab">
+    <section class="card food-game" id="foodGame">
+      <div class="food-head">
+        <div>
+          <h2>🍜 Food & Drinks Image Quiz</h2>
+          <p class="subtitle" style="font-size:13px">A non-conversational practice game: identify Vietnamese dishes, fruits and drinks using real internet images.</p>
+        </div>
+        <div class="toolbar" style="margin-top:0">
+          <button onclick="setFoodMode('nameToImage')">Name → Image</button>
+          <button class="ghost" onclick="setFoodMode('imageToName')">Image → Name</button>
+          <button class="secondary" onclick="startFoodGame(true)">New Question</button>
+        </div>
+      </div>
+      <div class="food-score">
+        <span class="food-pill">Food XP: <b id="foodScore">0</b></span>
+        <span class="food-pill">Mode: <b id="foodModeLabel">Name → Image</b></span>
+        <span class="food-pill">Topic: <b id="foodTopic">Food & drinks</b></span>
+      </div>
+      <div class="food-stage">
+        <div class="quiz-visual" id="foodVisual">
+          <div class="bubble system" style="opacity:1; transform:none; max-width:88%">Click “New Question” or choose a mode. This quiz does not use conversations.</div>
+        </div>
+        <div class="quiz-box">
+          <h3 class="quiz-question" id="foodQuestion">Guess the correct dish or drink.</h3>
+          <p class="quiz-sub" id="foodHint">Questions use vocabulary from the attached Food & Drinks lesson: dishes, fruits, drinks, taste adjectives, and ordering structures.</p>
+          <div class="food-options" id="foodOptions"></div>
+          <div class="lesson hidden" id="foodLesson"></div>
+        </div>
+      </div>
+    </section>
+    </section>
 
   </main>
 
-  <script>
-    /*
-      DATA STRUCTURE INSIDE SINGLE INDEX.HTML
-      Later, this can again be moved to questions.json.
-    */
+  <div class="modal-backdrop" id="guideModal" onclick="backdropClose(event)">
+    <div class="modal" id="guideBox" role="dialog" aria-modal="true" aria-labelledby="guideTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="guideTitle">Vietnamese Pronoun Guide</h2>
+          <p class="subtitle">A quick beginner-safe reference for “I” and “you” in everyday conversations.</p>
+        </div>
+        <button class="ghost" onclick="closePronounGuide()">Close</button>
+      </div>
+      <div class="guide-grid">
+        <div class="guide-card"><b>Same age / unsure</b><span><b>tôi / bạn</b> = safe and neutral. <b>mình / bạn</b> = friendlier and casual.</span></div>
+        <div class="guide-card"><b>Younger person</b><span>If you are male: <b>anh</b> for yourself. If female: <b>chị</b>. Use <b>em</b> for the younger person.</span></div>
+        <div class="guide-card"><b>Older male</b><span><b>anh</b> = slightly older. <b>chú</b> = uncle-age. <b>bác</b> = parent-age/respected older adult. <b>ông</b> = elderly man.</span></div>
+        <div class="guide-card"><b>Older female</b><span><b>chị</b> = slightly older. <b>cô</b> = aunt/teacher-age. <b>bác</b> = older respected adult. <b>bà</b> = elderly woman.</span></div>
+        <div class="guide-card"><b>Teachers</b><span><b>thầy</b> for male teacher, <b>cô</b> for female teacher. Add <b>ạ</b> to sound respectful.</span></div>
+        <div class="guide-card"><b>Avoid early</b><span><b>mày / tao</b> can sound rude or very intimate. Avoid with strangers, elders, teachers, and service workers.</span></div>
+      </div>
+      <table class="mini-table">
+        <tr><th>Situation</th><th>Vietnamese</th><th>Meaning</th></tr>
+        <tr><td>You greet a younger person</td><td>Anh/Chị chào em.</td><td>I greet you.</td></tr>
+        <tr><td>You greet an older woman</td><td>Em chào chị/cô/bác ạ.</td><td>I respectfully greet you.</td></tr>
+        <tr><td>Ask health to an elder</td><td>Ông/Bà có khỏe không ạ?</td><td>How is your health?</td></tr>
+        <tr><td>Ask zodiac animal</td><td>Bác tuổi con gì ạ?</td><td>What zodiac animal are you?</td></tr>
+      </table>
+    </div>
+  </div>
 
-    const SCENARIOS = {
-      intro: {
-        title: "Name & Useful Phrases",
-        npc: "Luisa",
-        avatar: "👩",
-        context: "Practice greetings, names, thank you, sorry, goodbye.",
-        dialogs: [
+
+  <div class="modal-backdrop" id="imageModal" onclick="closeImageModal(event)">
+    <div class="modal" id="imageBox" role="dialog" aria-modal="true" aria-labelledby="imageTitle">
+      <div class="modal-head">
+        <div>
+          <h2 id="imageTitle">Food image</h2>
+          <p class="subtitle" id="imageSubtitle">Click outside or press close to return to the quiz.</p>
+        </div>
+        <button class="ghost" onclick="closeImageModal()">Close</button>
+      </div>
+      <img class="image-modal-img" id="imageModalImg" src="" alt="Expanded food image">
+    </div>
+  </div>
+
+  <div class="toast" id="toast">Updated</div>
+
+<script>
+const nationalities = [
+  [
+    "India",
+    "Ấn Độ"
+  ],
+  [
+    "Vietnam",
+    "Việt Nam"
+  ],
+  [
+    "United States",
+    "Mỹ"
+  ],
+  [
+    "United Kingdom",
+    "Anh"
+  ],
+  [
+    "France",
+    "Pháp"
+  ],
+  [
+    "Germany",
+    "Đức"
+  ],
+  [
+    "Japan",
+    "Nhật Bản"
+  ],
+  [
+    "South Korea",
+    "Hàn Quốc"
+  ],
+  [
+    "China",
+    "Trung Quốc"
+  ],
+  [
+    "Australia",
+    "Úc"
+  ],
+  [
+    "Canada",
+    "Canada"
+  ],
+  [
+    "Russia",
+    "Nga"
+  ],
+  [
+    "Thailand",
+    "Thái Lan"
+  ],
+  [
+    "Singapore",
+    "Singapore"
+  ],
+  [
+    "Italy",
+    "Ý"
+  ],
+  [
+    "Mexico",
+    "Mexico"
+  ],
+  [
+    "Spain",
+    "Tây Ban Nha"
+  ],
+  [
+    "Laos",
+    "Lào"
+  ],
+  [
+    "Cambodia",
+    "Campuchia"
+  ]
+];
+
+const scenes = [
+  {
+    "id": "kid",
+    "emoji": "🧒",
+    "name": "Minh",
+    "age": 10,
+    "gender": "M",
+    "status": "Child",
+    "place": "Apartment courtyard",
+    "focus": "Greeting + name + numbers 1–10",
+    "questions": [
+      {
+        "prompt": "Minh waves at you. He is much younger than you. How should you greet him?",
+        "answers": [
           {
-            npcLine: "Em tên là gì?",
-            english: "What is your name?",
-            choices: [
-              {
-                text: "Anh tên là Sunit.",
-                meaning: "My name is Sunit.",
-                correct: true,
-                feedback: "Correct. Since Luisa is younger, you can call yourself anh."
-              },
-              {
-                text: "Em tên là Sunit.",
-                meaning: "My name is Sunit, younger speaker.",
-                correct: false,
-                feedback: "Not ideal if you are older and male."
-              }
-            ]
+            "text": "Anh chào em!",
+            "en": "Older male greets younger person.",
+            "good": true,
+            "why": "Use anh for yourself if you are an older male, and em for a younger person."
           },
           {
-            npcLine: "Cảm ơn anh!",
-            english: "Thank you!",
-            choices: [
-              {
-                text: "Không có gì.",
-                meaning: "You're welcome.",
-                correct: true,
-                feedback: "Correct. This is a natural response to cảm ơn."
-              },
-              {
-                text: "Tạm biệt.",
-                meaning: "Goodbye.",
-                correct: false,
-                feedback: "This is goodbye, not a response to thanks."
-              }
-            ]
+            "text": "Em chào anh!",
+            "en": "Younger person greets older male.",
+            "good": false,
+            "why": "This reverses the relationship."
+          },
+          {
+            "text": "Cháu chào bác ạ.",
+            "en": "Grandchild/younger person greets elder.",
+            "good": false,
+            "why": "Too elder-focused for a child."
+          },
+          {
+            "text": "Chào mày.",
+            "en": "Hi you. rude/intimate.",
+            "good": false,
+            "why": "Mày can sound rude with strangers and children you do not know well."
           }
         ]
       },
-
-      age: {
-        title: "Age, DOB & Zodiac",
-        npc: "Mai",
-        avatar: "👩‍🎓",
-        context: "Ask age, birth year, and zodiac animal.",
-        dialogs: [
+      {
+        "prompt": "Ask Minh his name using the correct pronoun.",
+        "answers": [
           {
-            npcLine: "Anh bao nhiêu tuổi?",
-            english: "How old are you?",
-            choices: [
-              {
-                text: "Anh ba sáu tuổi.",
-                meaning: "I am 36 years old.",
-                correct: true,
-                feedback: "Correct. A pronoun + number + tuổi."
-              },
-              {
-                text: "Anh sinh năm ba sáu.",
-                meaning: "I was born in 36.",
-                correct: false,
-                feedback: "This confuses age with birth year."
-              }
-            ]
+            "text": "Em tên là gì?",
+            "en": "What is your name?",
+            "good": true,
+            "why": "Em is correct for a younger person; tên là gì means “what is your name?”"
           },
           {
-            npcLine: "Anh sinh năm bao nhiêu?",
-            english: "What year were you born?",
-            choices: [
-              {
-                text: "Anh sinh năm một nghìn chín trăm chín mươi.",
-                meaning: "I was born in 1990.",
-                correct: true,
-                feedback: "Correct birth-year structure."
-              },
-              {
-                text: "Anh ba sáu tuổi.",
-                meaning: "I am 36 years old.",
-                correct: false,
-                feedback: "This answers age, not birth year."
-              }
-            ]
+            "text": "Ông tên là gì ạ?",
+            "en": "What is your name, grandfather?",
+            "good": false,
+            "why": "Ông is for an elderly man."
           },
           {
-            npcLine: "Anh tuổi con gì?",
-            english: "What zodiac animal are you?",
-            choices: [
-              {
-                text: "Anh tuổi ngựa.",
-                meaning: "I am horse zodiac.",
-                correct: true,
-                feedback: "Correct structure: pronoun + tuổi + animal."
-              },
-              {
-                text: "Anh tuổi ba sáu.",
-                meaning: "I am age 36.",
-                correct: false,
-                feedback: "Tuổi con gì asks zodiac animal, not numeric age."
-              }
-            ]
+            "text": "Bạn đến từ đâu?",
+            "en": "Where are you from?",
+            "good": false,
+            "why": "This asks origin, not name."
+          },
+          {
+            "text": "Em bao nhiêu tiền?",
+            "en": "How much money are you?",
+            "good": false,
+            "why": "Wrong structure; bao nhiêu tuổi is for age."
           }
         ]
       },
-
-      nationality: {
-        title: "Nationality & Languages",
-        npc: "Alina",
-        avatar: "🌍",
-        context: "Ask where someone is from, nationality, and language.",
-        dialogs: [
+      {
+        "prompt": "He asks your name: “Còn anh?”. Choose your answer.",
+        "answers": [
           {
-            npcLine: "Anh đến từ đâu?",
-            english: "Where are you from?",
-            choices: [
-              {
-                text: "Anh đến từ Ấn Độ.",
-                meaning: "I am from India.",
-                correct: true,
-                feedback: "Correct. đến từ = come from."
-              },
-              {
-                text: "Anh là tiếng Ấn Độ.",
-                meaning: "I am Indian language.",
-                correct: false,
-                feedback: "This mixes nationality and language."
-              }
-            ]
+            "text": "Anh tên là Sunit.",
+            "en": "My name is Sunit.",
+            "good": true,
+            "why": "A pronoun + tên là + name is the lesson structure."
           },
           {
-            npcLine: "Anh là người nước nào?",
-            english: "What nationality are you?",
-            choices: [
-              {
-                text: "Anh là người Ấn Độ.",
-                meaning: "I am Indian.",
-                correct: true,
-                feedback: "Correct. người + country = nationality."
-              },
-              {
-                text: "Anh đến từ tiếng Việt.",
-                meaning: "I come from Vietnamese language.",
-                correct: false,
-                feedback: "Wrong. tiếng Việt is a language."
-              }
-            ]
+            "text": "Anh là 36 tuổi.",
+            "en": "I am 36 years old.",
+            "good": false,
+            "why": "This answers age, not name."
           },
           {
-            npcLine: "Anh biết nói tiếng gì?",
-            english: "What languages can you speak?",
-            choices: [
-              {
-                text: "Anh biết nói tiếng Anh, tiếng Hindi và một chút tiếng Việt.",
-                meaning: "I can speak English, Hindi, and a little Vietnamese.",
-                correct: true,
-                feedback: "Excellent. biết nói + language."
-              },
-              {
-                text: "Anh biết nói Ấn Độ.",
-                meaning: "I can speak India.",
-                correct: false,
-                feedback: "Use tiếng + language, not just country."
-              }
-            ]
+            "text": "Tôi không sao.",
+            "en": "I am okay.",
+            "good": false,
+            "why": "Useful phrase, but not the answer to name."
+          },
+          {
+            "text": "Anh đến từ Ấn Độ.",
+            "en": "I come from India.",
+            "good": false,
+            "why": "This answers nationality/origin."
           }
         ]
       },
-
-      living: {
-        title: "Living in Vietnam",
-        npc: "Josh",
-        avatar: "🏠",
-        context: "Talk about living duration, address, and liking Vietnam.",
-        dialogs: [
+      {
+        "prompt": "Count “one to five” for Minh.",
+        "answers": [
           {
-            npcLine: "Anh sống ở Việt Nam bao lâu rồi?",
-            english: "How long have you lived in Vietnam?",
-            choices: [
-              {
-                text: "Anh sống ở Việt Nam ba tháng rồi.",
-                meaning: "I have lived in Vietnam for 3 months.",
-                correct: true,
-                feedback: "Correct. amount of time + rồi."
-              },
-              {
-                text: "Anh sống ở Việt Nam bao lâu rồi.",
-                meaning: "I live in Vietnam how long already.",
-                correct: false,
-                feedback: "This repeats the question, not the answer."
-              }
-            ]
+            "text": "Một, hai, ba, bốn, năm.",
+            "en": "One, two, three, four, five.",
+            "good": true,
+            "why": "These are the first five Vietnamese numbers."
           },
           {
-            npcLine: "Anh sống ở đâu?",
-            english: "Where do you live?",
-            choices: [
-              {
-                text: "Anh sống ở Hà Nội.",
-                meaning: "I live in Hanoi.",
-                correct: true,
-                feedback: "Correct. sống ở + place."
-              },
-              {
-                text: "Nhà anh bao lâu rồi.",
-                meaning: "My house how long already.",
-                correct: false,
-                feedback: "Wrong structure."
-              }
-            ]
+            "text": "Sáu, bảy, tám, chín, mười.",
+            "en": "Six to ten.",
+            "good": false,
+            "why": "This is six to ten, not one to five."
           },
           {
-            npcLine: "Anh thích sống ở Việt Nam không?",
-            english: "Do you like living in Vietnam?",
-            choices: [
-              {
-                text: "Có, vì Việt Nam đẹp, đồ ăn ngon và người Việt tốt bụng.",
-                meaning: "Yes, because Vietnam is beautiful, food is tasty, and Vietnamese people are kind.",
-                correct: true,
-                feedback: "Perfect answer using vì = because."
-              },
-              {
-                text: "Có, bao lâu rồi.",
-                meaning: "Yes, how long already.",
-                correct: false,
-                feedback: "This mixes two different structures."
-              }
-            ]
-          }
-        ]
-      },
-
-      food: {
-        title: "Food & Drinks",
-        npc: "Cô Linh",
-        avatar: "🍜",
-        context: "Talk about likes, taste, fruit, drinks, and dishes.",
-        dialogs: [
-          {
-            npcLine: "Anh thích món ăn Việt Nam nào nhất?",
-            english: "Which Vietnamese dish do you like most?",
-            choices: [
-              {
-                text: "Anh thích phở bò nhất.",
-                meaning: "I like beef pho the most.",
-                correct: true,
-                feedback: "Correct. thích + dish + nhất."
-              },
-              {
-                text: "Anh thích nhất phở bò nào.",
-                meaning: "Awkward order.",
-                correct: false,
-                feedback: "Use: pronoun + thích + dish + nhất."
-              }
-            ]
+            "text": "Mười một, mười hai, mười ba.",
+            "en": "Eleven, twelve, thirteen.",
+            "good": false,
+            "why": "Too high for this prompt."
           },
           {
-            npcLine: "Anh thấy món này có ngon không?",
-            english: "Do you think this dish is tasty?",
-            choices: [
-              {
-                text: "Dạ, ngon lắm ạ.",
-                meaning: "Yes, very tasty.",
-                correct: true,
-                feedback: "Correct polite taste response."
-              },
-              {
-                text: "Dạ, bao nhiêu tiền ạ.",
-                meaning: "How much is it?",
-                correct: false,
-                feedback: "This asks price, not taste."
-              }
-            ]
-          },
-          {
-            npcLine: "Anh thích đồ uống Việt Nam nào nhất?",
-            english: "Which Vietnamese drink do you like most?",
-            choices: [
-              {
-                text: "Anh thích cà phê sữa nhất.",
-                meaning: "I like Vietnamese milk coffee the most.",
-                correct: true,
-                feedback: "Correct drink preference structure."
-              },
-              {
-                text: "Anh thích đồ uống bao lâu rồi.",
-                meaning: "I like drinks how long already.",
-                correct: false,
-                feedback: "This incorrectly uses bao lâu rồi."
-              }
-            ]
-          }
-        ]
-      },
-
-      restaurant: {
-        title: "Restaurant Ordering",
-        npc: "Em phục vụ",
-        avatar: "🧑‍🍳",
-        context: "Call waiter, order food, customize sugar/ice/spice.",
-        dialogs: [
-          {
-            npcLine: "Chào anh, anh gọi món gì ạ?",
-            english: "Hello, what would you like to order?",
-            choices: [
-              {
-                text: "Cho anh một bún chả và một cà phê sữa.",
-                meaning: "Give me one bún chả and one milk coffee.",
-                correct: true,
-                feedback: "Correct. Cho + pronoun + order."
-              },
-              {
-                text: "Anh tên là bún chả.",
-                meaning: "My name is bún chả.",
-                correct: false,
-                feedback: "Funny, but wrong."
-              }
-            ]
-          },
-          {
-            npcLine: "Anh muốn uống gì ạ?",
-            english: "What would you like to drink?",
-            choices: [
-              {
-                text: "Anh muốn một sinh tố xoài không đá.",
-                meaning: "I want one mango smoothie with no ice.",
-                correct: true,
-                feedback: "Correct. không đá = no ice."
-              },
-              {
-                text: "Anh muốn một đá không sinh tố.",
-                meaning: "I want one ice no smoothie.",
-                correct: false,
-                feedback: "Wrong word order."
-              }
-            ]
-          }
-        ]
-      },
-
-      payment: {
-        title: "Bill, QR & Payment",
-        npc: "Thu ngân",
-        avatar: "💳",
-        context: "Ask for the bill, QR code, card, transfer, change.",
-        dialogs: [
-          {
-            npcLine: "Anh cần gì ạ?",
-            english: "What do you need?",
-            choices: [
-              {
-                text: "Em ơi, cho anh thanh toán.",
-                meaning: "Excuse me, bill please.",
-                correct: true,
-                feedback: "Correct. thanh toán / trả tiền = pay the bill."
-              },
-              {
-                text: "Em ơi, anh tuổi con gì?",
-                meaning: "Excuse me, what zodiac animal am I?",
-                correct: false,
-                feedback: "Wrong context."
-              }
-            ]
-          },
-          {
-            npcLine: "Của anh hết 50 nghìn ạ.",
-            english: "Your total is 50 thousand.",
-            choices: [
-              {
-                text: "Mã QR ở đâu ạ?",
-                meaning: "Where is the QR code?",
-                correct: true,
-                feedback: "Correct payment phrase."
-              },
-              {
-                text: "Vệ sinh ở đâu ạ?",
-                meaning: "Where is the toilet?",
-                correct: false,
-                feedback: "Useful phrase, but wrong payment context."
-              }
-            ]
+            "text": "Ngày, tuần, tháng, năm.",
+            "en": "Day, week, month, year.",
+            "good": false,
+            "why": "These are living-time vocabulary words."
           }
         ]
       }
-    };
+    ]
+  },
+  {
+    "id": "student",
+    "emoji": "🎒",
+    "name": "Lan",
+    "age": 22,
+    "gender": "F",
+    "status": "University student",
+    "place": "Language café",
+    "focus": "Name + study + tones",
+    "questions": [
+      {
+        "prompt": "Lan is a young adult. Greet her politely but naturally.",
+        "answers": [
+          {
+            "text": "Anh chào em.",
+            "en": "I greet you, younger person.",
+            "good": true,
+            "why": "If you are older, anh/chị for yourself and em for Lan is natural."
+          },
+          {
+            "text": "Ông chào cháu.",
+            "en": "Grandfather greets grandchild.",
+            "good": false,
+            "why": "You are not playing an elderly grandfather."
+          },
+          {
+            "text": "Mày tên gì?",
+            "en": "What is your name? rude.",
+            "good": false,
+            "why": "Mày is too rude here."
+          },
+          {
+            "text": "Bà có khỏe không ạ?",
+            "en": "Are you well, grandmother?",
+            "good": false,
+            "why": "Wrong age/gender relationship."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask what she studies.",
+        "answers": [
+          {
+            "text": "Em học ngành gì?",
+            "en": "What major do you study?",
+            "good": true,
+            "why": "Học ngành gì asks a student’s field/major."
+          },
+          {
+            "text": "Em sống ở Việt Nam bao lâu rồi?",
+            "en": "How long have you lived in Vietnam?",
+            "good": false,
+            "why": "Possible, but not about studies."
+          },
+          {
+            "text": "Em thích đồ uống nào nhất?",
+            "en": "Which drink do you like most?",
+            "good": false,
+            "why": "Food/drink topic, not studies."
+          },
+          {
+            "text": "Em sinh năm bao nhiêu?",
+            "en": "What year were you born?",
+            "good": false,
+            "why": "Age topic, not study topic."
+          }
+        ]
+      },
+      {
+        "prompt": "She says “Tiếng Việt có sáu thanh.” What is the best meaning?",
+        "answers": [
+          {
+            "text": "Vietnamese has six tones.",
+            "en": "Vietnamese has six tones.",
+            "good": true,
+            "why": "The tones are ngang, huyền, sắc, nặng, ngã, hỏi."
+          },
+          {
+            "text": "Vietnamese has six continents.",
+            "en": "Vietnamese has six continents.",
+            "good": false,
+            "why": "Châu lục means continent, not tone."
+          },
+          {
+            "text": "Vietnamese has six drinks.",
+            "en": "Vietnamese has six drinks.",
+            "good": false,
+            "why": "Đồ uống means drinks."
+          },
+          {
+            "text": "Vietnamese has six streets.",
+            "en": "Vietnamese has six streets.",
+            "good": false,
+            "why": "Đường/phố means street/road."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "teacher",
+    "emoji": "👩‍🏫",
+    "name": "Cô Diệp Anh",
+    "age": 34,
+    "gender": "F",
+    "status": "Teacher",
+    "place": "Vietnamese class",
+    "focus": "Respectful classroom phrases",
+    "questions": [
+      {
+        "prompt": "Start class respectfully with your female teacher.",
+        "answers": [
+          {
+            "text": "Em chào cô ạ.",
+            "en": "I respectfully greet you, teacher/aunt-age woman.",
+            "good": true,
+            "why": "Cô is correct for a female teacher; ạ adds respect."
+          },
+          {
+            "text": "Anh chào em.",
+            "en": "Older male greets younger person.",
+            "good": false,
+            "why": "Teacher role requires cô, not em."
+          },
+          {
+            "text": "Chào bạn.",
+            "en": "Hello friend.",
+            "good": false,
+            "why": "Too casual for a teacher."
+          },
+          {
+            "text": "Tạm biệt cô ạ.",
+            "en": "Goodbye teacher.",
+            "good": false,
+            "why": "This is farewell, not start of class."
+          }
+        ]
+      },
+      {
+        "prompt": "You did not finish homework yet. Say it simply.",
+        "answers": [
+          {
+            "text": "Em chưa làm bài tập ạ.",
+            "en": "I have not done homework yet.",
+            "good": true,
+            "why": "Chưa means “not yet”."
+          },
+          {
+            "text": "Em làm bài tập rồi ạ.",
+            "en": "I already did homework.",
+            "good": false,
+            "why": "Rồi means already, the opposite."
+          },
+          {
+            "text": "Em không có gì ạ.",
+            "en": "You are welcome / nothing.",
+            "good": false,
+            "why": "Useful phrase, but wrong context."
+          },
+          {
+            "text": "Ôi trời ơi!",
+            "en": "Oh my God!",
+            "good": false,
+            "why": "Funny, but not the answer."
+          }
+        ]
+      },
+      {
+        "prompt": "Thank your teacher after correction.",
+        "answers": [
+          {
+            "text": "Em cảm ơn cô ạ.",
+            "en": "Thank you, teacher.",
+            "good": true,
+            "why": "Cảm ơn + cô + ạ is respectful."
+          },
+          {
+            "text": "Không.",
+            "en": "No.",
+            "good": false,
+            "why": "Too abrupt and not thanks."
+          },
+          {
+            "text": "Không sao.",
+            "en": "It is okay.",
+            "good": false,
+            "why": "This reassures someone, not thanks them."
+          },
+          {
+            "text": "Hẹn gặp lại em.",
+            "en": "See you again, younger person.",
+            "good": false,
+            "why": "Wrong pronoun for teacher."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "airport",
+    "emoji": "🛂",
+    "name": "Anh Hải",
+    "age": 38,
+    "gender": "M",
+    "status": "Immigration officer",
+    "place": "Noi Bai airport",
+    "focus": "Countries + nationality + languages",
+    "questions": [
+      {
+        "prompt": "The officer asks where you are from. Answer as Sunit from India.",
+        "answers": [
+          {
+            "text": "Anh đến từ Ấn Độ.",
+            "en": "I come from India.",
+            "good": true,
+            "why": "Đến từ + country is the origin structure."
+          },
+          {
+            "text": "Anh là người Mỹ.",
+            "en": "I am American.",
+            "good": false,
+            "why": "Mỹ is United States, not India."
+          },
+          {
+            "text": "Anh sống ở Việt Nam 3 tháng rồi.",
+            "en": "I have lived in Vietnam for 3 months.",
+            "good": false,
+            "why": "This answers duration, not origin."
+          },
+          {
+            "text": "Anh thích phở bò nhất.",
+            "en": "I like beef pho most.",
+            "good": false,
+            "why": "Food preference, not nationality."
+          }
+        ]
+      },
+      {
+        "prompt": "Choose the correct sentence: “I am Indian.”",
+        "answers": [
+          {
+            "text": "Anh là người Ấn Độ.",
+            "en": "I am Indian.",
+            "good": true,
+            "why": "A pronoun + là người + country/nationality is correct."
+          },
+          {
+            "text": "Anh là tiếng Ấn Độ.",
+            "en": "I am Indian language.",
+            "good": false,
+            "why": "Tiếng is language; use người for nationality."
+          },
+          {
+            "text": "Anh đến người Ấn Độ.",
+            "en": "I come person India.",
+            "good": false,
+            "why": "Wrong structure."
+          },
+          {
+            "text": "Ấn Độ là anh.",
+            "en": "India is me.",
+            "good": false,
+            "why": "Word order is wrong."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask what languages he speaks.",
+        "answers": [
+          {
+            "text": "Anh nói được tiếng gì?",
+            "en": "What language can you speak?",
+            "good": true,
+            "why": "Nói được tiếng gì asks language ability."
+          },
+          {
+            "text": "Anh sống ở phố nào?",
+            "en": "Which street do you live on?",
+            "good": false,
+            "why": "This asks address."
+          },
+          {
+            "text": "Anh thích quả nào nhất?",
+            "en": "Which fruit do you like most?",
+            "good": false,
+            "why": "Fruit topic."
+          },
+          {
+            "text": "Anh bao nhiêu tuổi?",
+            "en": "How old are you?",
+            "good": false,
+            "why": "Age question, not language."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "taxi",
+    "emoji": "🚕",
+    "name": "Chú Nam",
+    "age": 49,
+    "gender": "M",
+    "status": "Taxi driver",
+    "place": "Hanoi Old Quarter",
+    "focus": "Living in Vietnam + address",
+    "questions": [
+      {
+        "prompt": "Ask the driver how long he has lived in Vietnam.",
+        "answers": [
+          {
+            "text": "Chú sống ở Việt Nam bao lâu rồi ạ?",
+            "en": "How long have you lived in Vietnam?",
+            "good": true,
+            "why": "A pronoun + sống ở Việt Nam + bao lâu rồi is the target structure."
+          },
+          {
+            "text": "Chú tên là gì ạ?",
+            "en": "What is your name?",
+            "good": false,
+            "why": "Name question, not duration."
+          },
+          {
+            "text": "Chú thích đồ ăn nào nhất ạ?",
+            "en": "Which food do you like most?",
+            "good": false,
+            "why": "Food preference, not living duration."
+          },
+          {
+            "text": "Em sống ở Việt Nam lâu chưa?",
+            "en": "Have you lived in Vietnam long?",
+            "good": false,
+            "why": "Em is wrong for an older driver."
+          }
+        ]
+      },
+      {
+        "prompt": "Tell him you live in Bangalore, India.",
+        "answers": [
+          {
+            "text": "Anh sống ở Bangalore, Ấn Độ.",
+            "en": "I live in Bangalore, India.",
+            "good": true,
+            "why": "Sống ở + place is the living-place structure."
+          },
+          {
+            "text": "Nhà anh ở đâu?",
+            "en": "Where is my/your house?",
+            "good": false,
+            "why": "This is a question, not your answer."
+          },
+          {
+            "text": "Anh đến Việt Nam mấy lần rồi?",
+            "en": "How many times have I/you been to Vietnam?",
+            "good": false,
+            "why": "Wrong question."
+          },
+          {
+            "text": "Anh chưa ăn sáng.",
+            "en": "I have not eaten breakfast yet.",
+            "good": false,
+            "why": "Not related to address."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask which district this street is in.",
+        "answers": [
+          {
+            "text": "Đường này ở quận nào ạ?",
+            "en": "Which district is this road in?",
+            "good": true,
+            "why": "Đường/phố + ở quận nào asks location by district."
+          },
+          {
+            "text": "Món này có cay không ạ?",
+            "en": "Is this dish spicy?",
+            "good": false,
+            "why": "Taste question, not street/district."
+          },
+          {
+            "text": "Chú tuổi con gì ạ?",
+            "en": "What zodiac animal are you?",
+            "good": false,
+            "why": "Tết/age topic."
+          },
+          {
+            "text": "Một trăm là gì?",
+            "en": "What is 100?",
+            "good": false,
+            "why": "Number topic, not district."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "landlord",
+    "emoji": "🏠",
+    "name": "Cô Hương",
+    "age": 46,
+    "gender": "F",
+    "status": "Landlord",
+    "place": "Apartment viewing",
+    "focus": "House + street + district",
+    "questions": [
+      {
+        "prompt": "Ask where the house/apartment is.",
+        "answers": [
+          {
+            "text": "Nhà cô ở đâu ạ?",
+            "en": "Where is your house/apartment?",
+            "good": true,
+            "why": "Nhà + pronoun + ở đâu asks where someone’s house is."
+          },
+          {
+            "text": "Cô tên là gì?",
+            "en": "What is your name?",
+            "good": false,
+            "why": "Name, not location."
+          },
+          {
+            "text": "Cô thích nước này không?",
+            "en": "Do you like this drink?",
+            "good": false,
+            "why": "Drink topic."
+          },
+          {
+            "text": "Cô đến từ mấy lần?",
+            "en": "From how many times?",
+            "good": false,
+            "why": "Invalid structure."
+          }
+        ]
+      },
+      {
+        "prompt": "Say “My house is on Kim Mã street.”",
+        "answers": [
+          {
+            "text": "Nhà anh ở phố Kim Mã.",
+            "en": "My house is on Kim Mã street.",
+            "good": true,
+            "why": "Nhà + pronoun + ở + place is correct."
+          },
+          {
+            "text": "Anh sống bao lâu rồi?",
+            "en": "How long have I/you lived?",
+            "good": false,
+            "why": "This is a duration question."
+          },
+          {
+            "text": "Anh là người Kim Mã.",
+            "en": "I am Kim Mã person.",
+            "good": false,
+            "why": "Wrong nationality-like structure."
+          },
+          {
+            "text": "Anh thích Kim Mã nhất.",
+            "en": "I like Kim Mã most.",
+            "good": false,
+            "why": "Preference, not address."
+          }
+        ]
+      },
+      {
+        "prompt": "Say you have lived here for three months.",
+        "answers": [
+          {
+            "text": "Anh sống ở đây 3 tháng rồi.",
+            "en": "I have lived here for 3 months.",
+            "good": true,
+            "why": "Ở đây + amount of time + rồi means “here for … already”."
+          },
+          {
+            "text": "Anh sống ở đây 3 lần rồi.",
+            "en": "I have lived here 3 times.",
+            "good": false,
+            "why": "Lần means times, not months."
+          },
+          {
+            "text": "Anh sống ở đây 3 ngày chưa.",
+            "en": "I not-yet lived here 3 days.",
+            "good": false,
+            "why": "Wrong use of chưa."
+          },
+          {
+            "text": "Anh đến từ đây 3 tháng.",
+            "en": "I come from here 3 months.",
+            "good": false,
+            "why": "Wrong structure for living duration."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "office",
+    "emoji": "💼",
+    "name": "Chị Mai",
+    "age": 31,
+    "gender": "F",
+    "status": "Office professional",
+    "place": "Coworking space",
+    "focus": "Work + company + degree",
+    "questions": [
+      {
+        "prompt": "Ask politely where she works.",
+        "answers": [
+          {
+            "text": "Chị làm việc ở đâu ạ?",
+            "en": "Where do you work?",
+            "good": true,
+            "why": "Chị is natural for a slightly older woman; làm việc ở đâu asks workplace."
+          },
+          {
+            "text": "Em làm việc ở đâu?",
+            "en": "Where do you work, younger person?",
+            "good": false,
+            "why": "Wrong pronoun for an older professional."
+          },
+          {
+            "text": "Chị uống trà nóng không?",
+            "en": "Do you drink hot tea?",
+            "good": false,
+            "why": "Drink topic, not work."
+          },
+          {
+            "text": "Chị là người nước nào?",
+            "en": "What nationality are you?",
+            "good": false,
+            "why": "This asks nationality, not workplace."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask what company she works for.",
+        "answers": [
+          {
+            "text": "Chị làm ở công ty nào ạ?",
+            "en": "Which company do you work at?",
+            "good": true,
+            "why": "Công ty nào asks which company."
+          },
+          {
+            "text": "Chị học trường nào ạ?",
+            "en": "Which school do you study at?",
+            "good": false,
+            "why": "That is for students."
+          },
+          {
+            "text": "Chị tuổi con gì ạ?",
+            "en": "What zodiac animal are you?",
+            "good": false,
+            "why": "Not workplace topic."
+          },
+          {
+            "text": "Chị thích cam nhất không?",
+            "en": "Do you like oranges most?",
+            "good": false,
+            "why": "Fruit topic."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask what degree/major she studied.",
+        "answers": [
+          {
+            "text": "Chị học ngành gì ạ?",
+            "en": "What did you study / what major?",
+            "good": true,
+            "why": "Học ngành gì works for major/field of study."
+          },
+          {
+            "text": "Chị bao nhiêu tiền ạ?",
+            "en": "How much money are you?",
+            "good": false,
+            "why": "Wrong and awkward."
+          },
+          {
+            "text": "Chị mấy lần rồi?",
+            "en": "How many times?",
+            "good": false,
+            "why": "Incomplete structure."
+          },
+          {
+            "text": "Chị có giòn không ạ?",
+            "en": "Are you crispy?",
+            "good": false,
+            "why": "Taste adjective applied to a person."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "fruit",
+    "emoji": "🥭",
+    "name": "Bà Hoa",
+    "age": 67,
+    "gender": "F",
+    "status": "Fruit seller",
+    "place": "Local market",
+    "focus": "Fruits + preference + numbers",
+    "questions": [
+      {
+        "prompt": "Greet the elderly fruit seller respectfully.",
+        "answers": [
+          {
+            "text": "Cháu chào bà ạ.",
+            "en": "I respectfully greet you, grandmother/elderly woman.",
+            "good": true,
+            "why": "Bà is correct for an elderly woman; cháu is humble."
+          },
+          {
+            "text": "Anh chào em.",
+            "en": "Older male greets younger person.",
+            "good": false,
+            "why": "Wrong age direction."
+          },
+          {
+            "text": "Chào bạn.",
+            "en": "Hello friend.",
+            "good": false,
+            "why": "Too flat for an elder."
+          },
+          {
+            "text": "Mày khỏe không?",
+            "en": "Are you well? rude.",
+            "good": false,
+            "why": "Very rude here."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask which Vietnamese fruit she likes most.",
+        "answers": [
+          {
+            "text": "Bà thích hoa quả Việt Nam nào nhất ạ?",
+            "en": "Which Vietnamese fruit do you like most?",
+            "good": true,
+            "why": "This follows the fruit preference structure: thích + hoa quả + nào nhất."
+          },
+          {
+            "text": "Bà thích đồ uống nào nhất ạ?",
+            "en": "Which drink do you like most?",
+            "good": false,
+            "why": "This asks drinks, not fruit."
+          },
+          {
+            "text": "Bà là người nước nào ạ?",
+            "en": "What nationality are you?",
+            "good": false,
+            "why": "Nationality, not fruit."
+          },
+          {
+            "text": "Bà sống ở Việt Nam lâu chưa ạ?",
+            "en": "Have you lived in Vietnam long?",
+            "good": false,
+            "why": "Living duration, not fruit."
+          }
+        ]
+      },
+      {
+        "prompt": "She points to mango. What is mango in Vietnamese?",
+        "answers": [
+          {
+            "text": "Xoài",
+            "en": "Mango.",
+            "good": true,
+            "why": "Xoài means mango."
+          },
+          {
+            "text": "Cam",
+            "en": "Orange.",
+            "good": false,
+            "why": "Cam means orange."
+          },
+          {
+            "text": "Chanh",
+            "en": "Lime/lemon.",
+            "good": false,
+            "why": "Chanh means lime/lemon."
+          },
+          {
+            "text": "Táo",
+            "en": "Apple.",
+            "good": false,
+            "why": "Táo means apple."
+          }
+        ]
+      },
+      {
+        "prompt": "Say you want four mangoes.",
+        "answers": [
+          {
+            "text": "Cháu muốn bốn quả xoài ạ.",
+            "en": "I want four mangoes.",
+            "good": true,
+            "why": "Muốn + number + quả + fruit is a natural beginner-safe order."
+          },
+          {
+            "text": "Cháu muốn mười nước ạ.",
+            "en": "I want ten waters.",
+            "good": false,
+            "why": "Wrong item and awkward classifier."
+          },
+          {
+            "text": "Cháu muốn một trăm xoài ạ.",
+            "en": "I want one hundred mangoes.",
+            "good": false,
+            "why": "Too many for this prompt."
+          },
+          {
+            "text": "Cháu thích xoài chưa.",
+            "en": "I like mango not yet.",
+            "good": false,
+            "why": "Wrong structure."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cafe",
+    "emoji": "☕",
+    "name": "Anh Tuấn",
+    "age": 28,
+    "gender": "M",
+    "status": "Café worker",
+    "place": "Hanoi café",
+    "focus": "Drinks + ordering + taste",
+    "questions": [
+      {
+        "prompt": "Order iced milk coffee politely.",
+        "answers": [
+          {
+            "text": "Cho anh một cà phê sữa đá.",
+            "en": "Give me one iced milk coffee.",
+            "good": true,
+            "why": "Cho + pronoun + item is a useful ordering pattern."
+          },
+          {
+            "text": "Anh là cà phê sữa đá.",
+            "en": "I am iced milk coffee.",
+            "good": false,
+            "why": "Là means “am/is”; wrong here."
+          },
+          {
+            "text": "Anh sống ở cà phê.",
+            "en": "I live in coffee.",
+            "good": false,
+            "why": "Wrong meaning."
+          },
+          {
+            "text": "Cà phê sữa đá bao lâu rồi?",
+            "en": "How long has iced coffee lived?",
+            "good": false,
+            "why": "Wrong structure."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask if the drink is sweet.",
+        "answers": [
+          {
+            "text": "Cà phê sữa đá có ngọt không?",
+            "en": "Is iced milk coffee sweet?",
+            "good": true,
+            "why": "Drink + có + adjective + không asks about taste."
+          },
+          {
+            "text": "Cà phê sữa đá có mặn không?",
+            "en": "Is iced milk coffee salty?",
+            "good": false,
+            "why": "Possible grammar, but not the expected taste."
+          },
+          {
+            "text": "Cà phê sữa đá ở quận nào?",
+            "en": "Which district is iced coffee in?",
+            "good": false,
+            "why": "Location question, not taste."
+          },
+          {
+            "text": "Cà phê sữa đá là người nước nào?",
+            "en": "What nationality is iced coffee?",
+            "good": false,
+            "why": "Invalid for a drink."
+          }
+        ]
+      },
+      {
+        "prompt": "Say all the drinks are delicious.",
+        "answers": [
+          {
+            "text": "Tất cả đồ uống đều ngon ạ!",
+            "en": "All drinks are delicious.",
+            "good": true,
+            "why": "Tất cả ... đều ngon means all are tasty."
+          },
+          {
+            "text": "Tất cả đồ uống đều là người Mỹ.",
+            "en": "All drinks are American people.",
+            "good": false,
+            "why": "Wrong noun category."
+          },
+          {
+            "text": "Tất cả đồ uống ở đâu?",
+            "en": "Where are all drinks?",
+            "good": false,
+            "why": "Question, not compliment."
+          },
+          {
+            "text": "Tất cả đồ uống chưa.",
+            "en": "All drinks not yet.",
+            "good": false,
+            "why": "Incomplete/wrong."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "streetfood",
+    "emoji": "🍜",
+    "name": "Cô Linh",
+    "age": 42,
+    "gender": "F",
+    "status": "Street-food cook",
+    "place": "Bún chả stall",
+    "focus": "Food ordering + liking dishes",
+    "questions": [
+      {
+        "prompt": "Ask whether she likes Vietnamese food.",
+        "answers": [
+          {
+            "text": "Cô có thích đồ ăn Việt Nam không ạ?",
+            "en": "Do you like Vietnamese food?",
+            "good": true,
+            "why": "Pronoun + có thích + thing + không is the “do you like” structure."
+          },
+          {
+            "text": "Cô sống ở Việt Nam mấy lần rồi?",
+            "en": "How many times have you lived in Vietnam?",
+            "good": false,
+            "why": "Wrong living structure."
+          },
+          {
+            "text": "Cô là người phở bò.",
+            "en": "You are beef pho person.",
+            "good": false,
+            "why": "Wrong nationality-like expression."
+          },
+          {
+            "text": "Cô học ngành nước ép cam?",
+            "en": "Do you study orange juice?",
+            "good": false,
+            "why": "Nonsense topic."
+          }
+        ]
+      },
+      {
+        "prompt": "Compliment the dish: “This dish is very delicious.”",
+        "answers": [
+          {
+            "text": "Món này rất ngon ạ!",
+            "en": "This dish is very delicious.",
+            "good": true,
+            "why": "Món này + rất ngon is exactly the taste compliment structure."
+          },
+          {
+            "text": "Món này rất năm ạ.",
+            "en": "This dish is very year/five.",
+            "good": false,
+            "why": "Năm is five/year, not a taste adjective."
+          },
+          {
+            "text": "Món này sống ở đâu ạ?",
+            "en": "Where does this dish live?",
+            "good": false,
+            "why": "Wrong structure."
+          },
+          {
+            "text": "Món này là người Việt Nam.",
+            "en": "This dish is Vietnamese person.",
+            "good": false,
+            "why": "Wrong noun category."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask which Vietnamese dish she likes most.",
+        "answers": [
+          {
+            "text": "Cô thích món ăn Việt Nam nào nhất ạ?",
+            "en": "Which Vietnamese dish do you like most?",
+            "good": true,
+            "why": "Thích + món ăn Việt Nam + nào nhất asks favorite dish."
+          },
+          {
+            "text": "Cô thích hoa quả Việt Nam nào nhất ạ?",
+            "en": "Which Vietnamese fruit do you like most?",
+            "good": false,
+            "why": "Fruit, not dish."
+          },
+          {
+            "text": "Cô nói được tiếng gì ạ?",
+            "en": "What language can you speak?",
+            "good": false,
+            "why": "Language topic."
+          },
+          {
+            "text": "Cô tuổi con gì ạ?",
+            "en": "What zodiac animal are you?",
+            "good": false,
+            "why": "Age/zodiac topic."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "doctor",
+    "emoji": "🩺",
+    "name": "Bác sĩ Phúc",
+    "age": 45,
+    "gender": "M",
+    "status": "Doctor",
+    "place": "Clinic",
+    "focus": "Health + useful phrases",
+    "questions": [
+      {
+        "prompt": "Greet the doctor respectfully.",
+        "answers": [
+          {
+            "text": "Em chào bác sĩ ạ.",
+            "en": "Hello doctor, respectfully.",
+            "good": true,
+            "why": "Bác sĩ is the role; ạ keeps it polite."
+          },
+          {
+            "text": "Chào mày.",
+            "en": "Hi you, rude.",
+            "good": false,
+            "why": "Rude and unsafe."
+          },
+          {
+            "text": "Anh chào em.",
+            "en": "Older greets younger.",
+            "good": false,
+            "why": "Not appropriate for doctor-patient role here."
+          },
+          {
+            "text": "Không có gì.",
+            "en": "You are welcome.",
+            "good": false,
+            "why": "Not a greeting."
+          }
+        ]
+      },
+      {
+        "prompt": "The doctor asks “Có sao không?”. Say you are okay.",
+        "answers": [
+          {
+            "text": "Em không sao ạ.",
+            "en": "I am okay.",
+            "good": true,
+            "why": "Không sao means “it is okay / I am okay”."
+          },
+          {
+            "text": "Em không có gì ạ.",
+            "en": "You are welcome / no problem.",
+            "good": false,
+            "why": "Close, but this is usually a response to thanks."
+          },
+          {
+            "text": "Em hẹn gặp lại ạ.",
+            "en": "See you again.",
+            "good": false,
+            "why": "Farewell, not health answer."
+          },
+          {
+            "text": "Ôi trời ơi!",
+            "en": "Oh my God!",
+            "good": false,
+            "why": "Not a calm health answer."
+          }
+        ]
+      },
+      {
+        "prompt": "Say sorry because you are late.",
+        "answers": [
+          {
+            "text": "Em xin lỗi bác sĩ ạ.",
+            "en": "I am sorry, doctor.",
+            "good": true,
+            "why": "Xin lỗi is the apology phrase."
+          },
+          {
+            "text": "Em cảm ơn bác sĩ ạ.",
+            "en": "Thank you, doctor.",
+            "good": false,
+            "why": "Thanks, not sorry."
+          },
+          {
+            "text": "Em tạm biệt bác sĩ ạ.",
+            "en": "Goodbye doctor.",
+            "good": false,
+            "why": "Farewell."
+          },
+          {
+            "text": "Em vâng bác sĩ ạ.",
+            "en": "Yes doctor.",
+            "good": false,
+            "why": "Agreement, not apology."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "elder",
+    "emoji": "👴",
+    "name": "Ông Bình",
+    "age": 72,
+    "gender": "M",
+    "status": "Elder",
+    "place": "Lakeside bench",
+    "focus": "Age + birth year + respect",
+    "questions": [
+      {
+        "prompt": "Greet the elderly man respectfully.",
+        "answers": [
+          {
+            "text": "Cháu chào ông ạ.",
+            "en": "I respectfully greet you, grandfather/elderly man.",
+            "good": true,
+            "why": "Ông is correct for elderly man; cháu is humble."
+          },
+          {
+            "text": "Anh chào em.",
+            "en": "Older male greets younger person.",
+            "good": false,
+            "why": "Wrong direction."
+          },
+          {
+            "text": "Bạn khỏe không?",
+            "en": "Are you well, friend?",
+            "good": false,
+            "why": "Too informal for this relationship."
+          },
+          {
+            "text": "Mày bao nhiêu tuổi?",
+            "en": "How old are you? rude.",
+            "good": false,
+            "why": "Rude."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask how old he is.",
+        "answers": [
+          {
+            "text": "Ông bao nhiêu tuổi ạ?",
+            "en": "How old are you?",
+            "good": true,
+            "why": "Bao nhiêu tuổi asks age; ông + ạ is respectful."
+          },
+          {
+            "text": "Ông là người nước nào?",
+            "en": "What nationality are you?",
+            "good": false,
+            "why": "Nationality, not age."
+          },
+          {
+            "text": "Ông uống trà không?",
+            "en": "Do you drink tea?",
+            "good": false,
+            "why": "Drink, not age."
+          },
+          {
+            "text": "Ông học ngành gì ạ?",
+            "en": "What major do you study?",
+            "good": false,
+            "why": "Wrong likely context."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask what year he was born.",
+        "answers": [
+          {
+            "text": "Ông sinh năm bao nhiêu ạ?",
+            "en": "What year were you born?",
+            "good": true,
+            "why": "Sinh năm bao nhiêu asks birth year."
+          },
+          {
+            "text": "Ông sinh món gì ạ?",
+            "en": "What dish were you born?",
+            "good": false,
+            "why": "Wrong word."
+          },
+          {
+            "text": "Ông sống ở quận nào ạ?",
+            "en": "Which district do you live in?",
+            "good": false,
+            "why": "Address, not birth year."
+          },
+          {
+            "text": "Ông thích cay không ạ?",
+            "en": "Do you like spicy?",
+            "good": false,
+            "why": "Taste topic."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "tet",
+    "emoji": "🐉",
+    "name": "Bác Thu",
+    "age": 60,
+    "gender": "F",
+    "status": "Family friend",
+    "place": "Tết visit",
+    "focus": "Zodiac animal + family health",
+    "questions": [
+      {
+        "prompt": "During Tết, greet a respected older family friend.",
+        "answers": [
+          {
+            "text": "Cháu chào bác ạ.",
+            "en": "I respectfully greet you, elder/family friend.",
+            "good": true,
+            "why": "Cháu + bác + ạ is natural with older family friends."
+          },
+          {
+            "text": "Anh chào em.",
+            "en": "Older male greets younger person.",
+            "good": false,
+            "why": "Wrong relationship."
+          },
+          {
+            "text": "Bạn khỏe không?",
+            "en": "Are you well, friend?",
+            "good": false,
+            "why": "Too casual."
+          },
+          {
+            "text": "Chào mày.",
+            "en": "Hi you, rude.",
+            "good": false,
+            "why": "Very inappropriate."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask her zodiac animal.",
+        "answers": [
+          {
+            "text": "Bác tuổi con gì ạ?",
+            "en": "What zodiac animal are you?",
+            "good": true,
+            "why": "Tuổi con gì asks zodiac animal."
+          },
+          {
+            "text": "Bác người nước nào ạ?",
+            "en": "What nationality are you?",
+            "good": false,
+            "why": "Nationality, not zodiac."
+          },
+          {
+            "text": "Bác nói được tiếng gì ạ?",
+            "en": "What language can you speak?",
+            "good": false,
+            "why": "Language, not zodiac."
+          },
+          {
+            "text": "Bác có giòn không ạ?",
+            "en": "Are you crispy?",
+            "good": false,
+            "why": "Taste adjective applied incorrectly."
+          }
+        ]
+      },
+      {
+        "prompt": "Ask about everyone in the family politely.",
+        "answers": [
+          {
+            "text": "Mọi người trong nhà bác có khỏe không ạ?",
+            "en": "Is everyone in your family well?",
+            "good": true,
+            "why": "A warm respectful family-health question."
+          },
+          {
+            "text": "Nhà mày khỏe không?",
+            "en": "Is your family well? rude.",
+            "good": false,
+            "why": "Mày is rude."
+          },
+          {
+            "text": "Bác làm bài tập chưa?",
+            "en": "Have you done homework?",
+            "good": false,
+            "why": "Wrong situation."
+          },
+          {
+            "text": "Bác uống mười một không?",
+            "en": "Do you drink eleven?",
+            "good": false,
+            "why": "Invalid expression."
+          }
+        ]
+      }
+    ]
+  }
+];
 
-    /*
-      GAME LOGIC PLAN:
-      - Load character profile
-      - User selects scenario
-      - Render NPC line
-      - Render choices
-      - On answer:
-        - show user response inline
-        - mark correct/wrong
-        - show meaning + correction
-        - update XP/hearts
-      - Next button advances dialog
-      - After scene ends, auto-scroll to top
-    */
 
-    /*
-      VISIT COUNTER:
-      localStorage starts at 4200.
-      Every visit adds random 1-9.
-    */
-  </script>
+function makeAnswer(text,en,good,why){ return {text,en,good,why}; }
+function makeQ(prompt, correctText, correctEn, why, wrongs){
+  return {prompt, answers:[makeAnswer(correctText, correctEn, true, why), ...wrongs.map(w=>makeAnswer(w[0], w[1], false, w[2]))]};
+}
+function extraQuestionsForScene(s){
+  const rel = s.age >= 65 ? (s.gender==='M'?'ông':'bà') : s.age >= 50 ? 'bác' : s.status.toLowerCase().includes('teacher') ? (s.gender==='M'?'thầy':'cô') : s.status.toLowerCase().includes('doctor') ? 'bác sĩ' : s.age <= 17 ? 'em' : (s.gender==='M'?'anh':'chị');
+  const respectful = ['ông','bà','bác','cô','chú','thầy','bác sĩ'].some(x=>rel.includes(x));
+  const particle = respectful ? ' ạ' : '';
+  const self = respectful ? 'em' : (s.age <= 17 ? 'anh' : 'em');
+  const greet = respectful ? `Em chào ${rel} ạ!` : (rel==='em' ? 'Anh chào em!' : `Em chào ${rel}!`);
+  const nameQ = rel==='em' ? 'Em tên là gì?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} tên là gì${particle}?`;
+  const ageQ = rel==='em' ? 'Em bao nhiêu tuổi?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} bao nhiêu tuổi${particle}?`;
+  const natQ = rel==='em' ? 'Em là người nước nào?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} là người nước nào${particle}?`;
+  const liveQ = rel==='em' ? 'Em sống ở Việt Nam bao lâu rồi?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} sống ở Việt Nam bao lâu rồi${particle}?`;
+  const likeQ = rel==='em' ? 'Em có thích Việt Nam không?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} có thích Việt Nam không${particle}?`;
+  const foodQ = rel==='em' ? 'Em thích món ăn Việt Nam nào nhất?' : `${rel.charAt(0).toUpperCase()+rel.slice(1)} thích món ăn Việt Nam nào nhất${particle}?`;
+  const tastyQ = rel==='em' ? 'Món này có ngon không?' : `Món này có ngon không${particle}?`;
+  const thanks = respectful ? `Cảm ơn ${rel} ạ!` : `Cảm ơn ${rel}!`;
+  const bye = respectful ? `Tạm biệt ${rel} ạ. Hẹn gặp lại!` : `Tạm biệt ${rel}. Hẹn gặp lại!`;
+  return [
+    makeQ(`Start politely with ${s.name}.`, greet, 'Polite greeting for this role.', `Use ${rel} for this person and add ạ when respect is needed.`, [['Chào mày.','Hey you.','Too rude/intimate for this game.'],['Tôi tên là gì?','What is my name?','That asks about yourself, not a greeting.'],['Không sao.','No problem.','Useful phrase, but not a greeting.']]),
+    makeQ(`Ask ${s.name} for their name.`, nameQ, 'What is your name?', 'Tên là gì means “what is your name?” and the address term matches the role.', [['Bạn bao nhiêu tuổi?','How old are you?','This asks age, not name.'],['Tôi tên là Sunit.','My name is Sunit.','That answers instead of asking.'],['Ôi trời ơi!','Oh my God!','Expression, not a name question.']]),
+    makeQ(`Ask ${s.name} about age.`, ageQ, 'How old are you?', 'Bao nhiêu tuổi is the beginner-safe age question.', [['Bao nhiêu tiền?','How much money?','Wrong question word for age.'],['Tên là gì?','What is the name?','This asks name.'],['Bạn có ngon không?','Are you tasty?','Funny but wrong and impolite.']]),
+    makeQ(`Ask ${s.name} about nationality.`, natQ, 'What nationality / country are you from?', 'Người nước nào is the useful structure for nationality.', [['Bạn ăn sáng chưa?','Have you eaten breakfast yet?','This uses rồi/chưa topic, not nationality.'],['Bạn sống bao lâu rồi?','How long have you lived?','Living duration, not nationality.'],['Bạn thích phở nhất.','You like pho most.','Statement, not a nationality question.']]),
+    makeQ(`Ask how long ${s.name} has lived in Vietnam.`, liveQ, 'How long have you lived in Vietnam?', 'Sống ở Việt Nam bao lâu rồi is the lesson structure for duration.', [['Bạn đến Việt Nam mấy lần rồi?','How many times have you been to Vietnam?','Related but asks number of visits, not living duration.'],['Bạn tên là gì?','What is your name?','Name question.'],['Món này rất ngon.','This dish is tasty.','Food statement, not duration.']]),
+    makeQ(`Ask whether ${s.name} likes Vietnam.`, likeQ, 'Do you like Vietnam?', 'Có thích ... không forms a yes/no liking question.', [['Bạn là người Ấn Độ.','You are Indian.','Statement, not question.'],['Không có gì.','You are welcome.','Useful phrase, not a question.'],['Một, hai, ba.','One, two, three.','Numbers, not preference.']]),
+    makeQ(`Ask ${s.name} which Vietnamese dish they like most.`, foodQ, 'Which Vietnamese food do you like most?', 'Nào nhất means “which one the most.”', [['Bạn thích đồ ăn Việt Nam không?','Do you like Vietnamese food?','Good structure, but not “which most.”'],['Món này có cay không?','Is this spicy?','Taste adjective question, not favorite dish.'],['Bạn uống cà phê rồi.','You drank coffee already.','Statement, not question.']]),
+    makeQ(`Ask whether the dish is tasty.`, tastyQ, 'Is this dish tasty?', 'Có ngon không asks whether something tastes good.', [['Món này bao nhiêu tuổi?','How old is this dish?','Age structure used incorrectly.'],['Món này tên là gì?','What is this dish called?','Name question, not taste.'],['Tất cả các món đều là người Việt Nam.','All dishes are Vietnamese people.','Wrong noun category.']]),
+    makeQ(`Thank ${s.name} after they help you.`, thanks, 'Thank you.', 'Cảm ơn is thank you; ạ makes it respectful.', [['Xin lỗi.','Sorry.','Useful, but not thanks.'],['Không.','No.','Not appropriate after help.'],['Chưa.','Not yet.','Rồi/chưa answer, not thanks.']]),
+    makeQ(`End the conversation with ${s.name}.`, bye, 'Goodbye. See you again.', 'Tạm biệt and hẹn gặp lại are natural closing phrases.', [['Vâng/có/ừ.','Yes.','Agreement, not goodbye.'],['Bạn bao nhiêu tuổi?','How old are you?','Question, not closing.'],['Tôi ăn sáng rồi.','I already ate breakfast.','Rồi/chưa practice, not goodbye.']])
+  ];
+}
+function enrichScenes(){
+  scenes.forEach(s => {
+    const seen = new Set(s.questions.map(q => q.prompt));
+    for (const q of extraQuestionsForScene(s)) {
+      if (s.questions.length >= 10) break;
+      if (!seen.has(q.prompt)) { s.questions.push(q); seen.add(q.prompt); }
+    }
+  });
+}
+
+let state = { score:0, hearts:5, level:1, active:null, qIndex:0, locked:false };
+const hasAnime = () => window.anime && typeof anime === 'function';
+function animateIn(targets, opts={}) { if (hasAnime()) anime({targets, opacity:[0,1], translateY:[12,0], delay: anime.stagger ? anime.stagger(45) : 0, duration:520, easing:'easeOutCubic', ...opts}); }
+function pulse(target) { if (hasAnime()) anime({targets:target, scale:[1,.985,1.015,1], duration:420, easing:'easeOutQuad'}); }
+
+function init(){
+  enrichScenes();
+  const nat=document.getElementById('nationality');
+  nat.innerHTML=nationalities.map(([en,vi])=>`<option value="${vi}">${en} / ${vi}</option>`).join('');
+  renderPlaces();
+  startGame(false);
+  animateIn('.intro-card, .progress-card', {delay:120});
+  animateIn('.place', {delay:280});
+}
+function player(){return{name:document.getElementById('name').value.trim()||'Player',gender:document.getElementById('gender').value,age:Number(document.getElementById('age').value||30),nationality:document.getElementById('nationality').value};}
+function startGame(show=true){const p=player(); const self=p.gender==='M'?'anh':'chị'; document.getElementById('coach').innerHTML=`You are <b>${p.name}</b>, age <b>${p.age}</b>, from <b>${p.nationality}</b>. Same age: <b>tôi/bạn</b> or <b>mình/bạn</b>. Younger: you may be <b>${self}</b>, they are <b>em</b>. Elders: use <b>ông/bà/cô/chú/bác</b> + <b>ạ</b>.`; if(show) toast('Character updated'); pulse('.progress-card');}
+function renderPlaces(){document.getElementById('places').innerHTML=scenes.map(s=>`<div class="place" id="place-${s.id}" onclick="loadScene('${s.id}', true)"><div class="avatar">${s.emoji}</div><div><h3>${s.name}</h3><p>${s.place}<br>${s.focus}</p><span class="tag">${s.status}</span></div></div>`).join('');}
+function relationLabel(npc){const p=player(); const gap=npc.age-p.age; if(npc.age>=65)return npc.gender==='M'?'ông':'bà'; if(gap>=16)return npc.age>=50?'bác':(npc.gender==='M'?'chú':'cô'); if(gap>=3)return npc.gender==='M'?'anh':'chị'; if(gap<=-3)return'em'; return'bạn';}
+
+function loadScene(id, scrollTop=false){
+  state.active=scenes.find(s=>s.id===id); state.qIndex=0; state.locked=false;
+  document.querySelectorAll('.place').forEach(x=>x.classList.remove('active'));
+  const place = document.getElementById(`place-${id}`); if(place) place.classList.add('active');
+  const s=state.active, rel=relationLabel(s);
+  document.getElementById('npcAvatar').textContent=s.emoji;
+  document.getElementById('sceneTitle').textContent=`${s.name} — ${s.place}`;
+  document.getElementById('sceneMeta').innerHTML=`${s.status}, age ${s.age}. Suggested address term: <b>${rel}</b>. Focus: ${s.focus}.`;
+  document.getElementById('conversation').innerHTML='';
+  document.getElementById('lesson').classList.add('hidden');
+  renderQuestion();
+  pulse('#npcAvatar'); animateIn('#gamePanel');
+  if(scrollTop) scrollGameTop();
+}
+
+function renderQuestion(){
+  const s=state.active; const q=s.questions[state.qIndex];
+  state.locked=false;
+  updateSceneProgress();
+  addBubble('npc', `${s.name}: ${q.prompt}`);
+  addBubble('system', `Question ${state.qIndex+1} of ${s.questions.length}. Choose the best Vietnamese line.`);
+  renderChoices(q.answers);
+}
+
+function renderChoices(answers){document.getElementById('choices').innerHTML=answers.map((a,i)=>`<button class="choice" onclick="answer(${i})">${a.text}<small>${a.en}</small></button>`).join(''); animateIn('.choice',{delay:120});}
+
+function answer(i){
+  if(state.locked||!state.active)return; state.locked=true;
+  const q=state.active.questions[state.qIndex]; const ans=q.answers[i]; const buttons=[...document.querySelectorAll('.choice')];
+  buttons.forEach((b,idx)=>{b.disabled=true; if(q.answers[idx].good)b.classList.add('correct'); if(idx===i&&!ans.good)b.classList.add('wrong');});
+  addBubble('player',ans.text);
+  if(ans.good){state.score+=20; addBubble('system',`✅ Correct! ${ans.why}`); toast('+20 XP');}
+  else{state.hearts=Math.max(0,state.hearts-1); addBubble('system',`❌ Not quite. ${ans.why}`); toast('Heart lost');}
+  state.level=1+Math.floor(state.score/100); updateStats(); pulse(ans.good?'#score':'#hearts');
+  showStepLesson(ans);
+}
+
+function showStepLesson(ans){
+  const s=state.active; const isLast = state.qIndex >= s.questions.length - 1;
+  const lesson=document.getElementById('lesson');
+  lesson.innerHTML=`<b>${isLast ? 'Scene complete' : 'Good, continue the conversation'}</b><br>${ans.why}<div class="toolbar"><button onclick="${isLast ? 'nextScene()' : 'nextQuestion()'}">${isLast ? 'Next Scene' : 'Next Question'}</button><button class="ghost" onclick="retryQuestion()">Retry Question</button></div>`;
+  lesson.classList.remove('hidden'); animateIn('#lesson');
+}
+
+function nextQuestion(){
+  state.qIndex += 1;
+  document.getElementById('lesson').classList.add('hidden');
+  document.getElementById('choices').innerHTML='';
+  renderQuestion();
+}
+function retryQuestion(){
+  document.getElementById('lesson').classList.add('hidden');
+  document.getElementById('choices').innerHTML='';
+  renderQuestion();
+}
+function nextScene(){const idx=scenes.findIndex(s=>s.id===state.active.id); loadScene(scenes[(idx+1)%scenes.length].id, true);} 
+function retryScene(){loadScene(state.active.id, true);}
+function scrollGameTop(){ setTimeout(()=>document.getElementById('gamePanel').scrollIntoView({behavior:'smooth', block:'start'}), 40); document.getElementById('conversation').scrollTop = 0; }
+function updateSceneProgress(){ const pct = state.active ? ((state.qIndex) / state.active.questions.length) * 100 : 0; document.getElementById('sceneProgress').style.width = `${pct}%`; }
+function addBubble(type,text){const box=document.getElementById('conversation'); const div=document.createElement('div'); div.className=`bubble ${type}`; div.textContent=text; box.appendChild(div); box.scrollTop=box.scrollHeight; animateIn(div,{duration:360});}
+function updateStats(){document.getElementById('score').textContent=state.score; document.getElementById('hearts').textContent=state.hearts; document.getElementById('level').textContent=state.level;}
+function showPronounGuide(){ const modal=document.getElementById('guideModal'); const box=document.getElementById('guideBox'); modal.classList.add('open'); if(hasAnime()) anime({targets:box, opacity:[0,1], translateY:[16,0], scale:[.98,1], duration:320, easing:'easeOutCubic'}); }
+function closePronounGuide(){ const modal=document.getElementById('guideModal'); const box=document.getElementById('guideBox'); if(hasAnime()) anime({targets:box, opacity:[1,0], translateY:[0,16], scale:[1,.98], duration:220, easing:'easeInCubic', complete:()=>modal.classList.remove('open')}); else modal.classList.remove('open'); }
+function backdropClose(e){ if(e.target.id==='guideModal') closePronounGuide(); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closePronounGuide(); });
+function toast(msg){const t=document.getElementById('toast'); t.textContent=msg; if(hasAnime()) anime({targets:t, opacity:[0,1,1,0], translateY:[20,0,0,20], duration:1800, easing:'easeOutCubic', keyframes:[{opacity:1,translateY:0,duration:250},{opacity:1,translateY:0,duration:1050},{opacity:0,translateY:20,duration:300}]});}
+
+
+function ccFile(name){ return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(name)}?width=900`; }
+const foodItems = [
+  {vi:'Phở bò', en:'Beef noodle soup', cat:'Món ăn / dish', taste:'ngon, nóng, thơm', imgs:[ccFile('Phở bò (39425047901).jpg'), ccFile('Two bowls of phở bò with various toppings.jpg'), ccFile('Typicalbeefpho.jpg')]},
+  {vi:'Bánh mì', en:'Vietnamese baguette sandwich', cat:'Món ăn / dish', taste:'giòn, ngon', imgs:[ccFile('Hai ổ bánh mì.jpg'), ccFile('Bánh mì thịt nướng.png'), ccFile('Bánh mì.jpg'), ccFile('Bánh mì đặc trưng Sàigòn.JPG')]},
+  {vi:'Bún chả', en:'Grilled pork with rice noodles', cat:'Món ăn / dish', taste:'ngon, mặn, ngọt', imgs:[ccFile('Bun Cha.jpg'), ccFile('Bún chả Hàng Mành.jpg'), ccFile('Bún chả Vietnamese food.jpg'), ccFile('Bún chả with chili peppers and fresh garlic.jpg')]},
+  {vi:'Nem', en:'Fried spring rolls', cat:'Món ăn / dish', taste:'giòn, ngon', imgs:[ccFile('Cha gio.jpg'), ccFile('Chả giò.jpg'), ccFile('Vietnamese fried spring rolls.jpg'), ccFile('Spring rolls Vietnam.jpg')]},
+  {vi:'Cà phê sữa đá', en:'Vietnamese iced milk coffee', cat:'Đồ uống / drink', taste:'ngọt, đắng, lạnh', imgs:[ccFile('Ca phe sua da.jpg'), ccFile('Cà phê sữa đá.jpg'), ccFile('Vietnamese iced coffee.jpg'), ccFile('Cà phê đá.jpg')]},
+  {vi:'Trà', en:'Tea', cat:'Đồ uống / drink', taste:'đắng nhẹ, nóng hoặc lạnh', imgs:[ccFile('Green Tea.jpg'), ccFile('Green tea leaves.jpg'), ccFile('Tea in a glass.jpg'), ccFile('Vietnamese tea.jpg')]},
+  {vi:'Nước ép cam', en:'Orange juice', cat:'Đồ uống / drink', taste:'ngọt, chua', imgs:[ccFile('Orange juice 1.jpg'), ccFile('Orange juice.jpg'), ccFile('Glass of orange juice.jpg')]},
+  {vi:'Sinh tố xoài', en:'Mango smoothie', cat:'Đồ uống / drink', taste:'ngọt, béo', imgs:[ccFile('Mango smoothie.jpg'), ccFile('Mango lassi.jpg'), ccFile('Smoothie mango.jpg')]},
+  {vi:'Cam', en:'Orange', cat:'Hoa quả / fruit', taste:'ngọt, chua', imgs:[ccFile('Oranges - whole-halved-segment.jpg'), ccFile('Orange fruit.jpg'), ccFile('Oranges.jpg')]},
+  {vi:'Chanh', en:'Lime / lemon', cat:'Hoa quả / fruit', taste:'chua', imgs:[ccFile('Limes.jpg'), ccFile('Lime fruit.jpg'), ccFile('Lemons.jpg')]},
+  {vi:'Xoài', en:'Mango', cat:'Hoa quả / fruit', taste:'ngọt', imgs:[ccFile('Mangoes pic.jpg'), ccFile('Mangoes.jpg'), ccFile('Mango fruit.jpg')]},
+  {vi:'Táo', en:'Apple', cat:'Hoa quả / fruit', taste:'ngọt, giòn', imgs:[ccFile('Red Apple.jpg'), ccFile('Apple fruit.jpg'), ccFile('Apples.jpg')]},
+  {vi:'Bún bò Huế', en:'Hue spicy beef noodle soup', cat:'Món ăn / dish', taste:'cay, ngon, thơm', imgs:[ccFile('Bun Bo Hue.jpg'), ccFile('Bún bò Huế.jpg'), ccFile('Bún bò huế.jpg')]},
+  {vi:'Gỏi cuốn', en:'Fresh spring rolls', cat:'Món ăn / dish', taste:'tươi, ngon', imgs:[ccFile('Gỏi cuốn.jpg'), ccFile('Gỏi cuốn (49358210697).jpg'), ccFile('Goi cuon Phuongnhu.JPG'), ccFile('East-asian-food-spring-rolls-3.jpg')]},
+  {vi:'Cơm tấm', en:'Broken rice plate', cat:'Món ăn / dish', taste:'mặn, ngọt, ngon', imgs:[ccFile('Cơm tấm bì chả.jpg'), ccFile('Cơm tấm Sài Gòn (sườn trứng), ng15th8n2022.jpg'), ccFile('Cơm tấm SG (cơm sườn) ng27th9n2020 (2).jpg')]},
+  {vi:'Chè', en:'Vietnamese sweet dessert soup', cat:'Đồ ngọt / dessert', taste:'ngọt, béo', imgs:[ccFile('Chè ba màu.jpg'), ccFile('Che ba mau.jpg'), ccFile('Chè.jpg'), ccFile('Vietnamese chè.jpg')]}
+];
+let foodState = {score:0, mode:'nameToImage', current:null, options:[], locked:false};
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-.5); }
+function primaryImg(item){ return (item.imgs && item.imgs[0]) || item.img || ''; }
+function imgTag(item, size='thumb'){
+  const imgs = item.imgs || [item.img];
+  const encoded = encodeURIComponent(JSON.stringify(imgs));
+  const label = `${item.vi}`.replace(/"/g,'&quot;');
+  return `<div class="food-img-frame ${size==='large'?'large':''}" data-imgs="${encoded}" data-index="0" data-vi="${item.vi}" data-en="${item.en}" onclick="openImageModal(this)">
+    <img src="${imgs[0]}" alt="${label}" loading="lazy" onerror="foodImageError(this)">
+    <span class="zoom-btn" title="Enlarge image" onclick="event.stopPropagation(); openImageModal(this.closest('.food-img-frame'))">⤢</span>
+  </div>`;
+}
+function foodImageError(img){
+  const frame = img.closest('.food-img-frame');
+  if(!frame) return;
+  const imgs = JSON.parse(decodeURIComponent(frame.dataset.imgs || '%5B%5D'));
+  const next = Number(frame.dataset.index || 0) + 1;
+  if(next < imgs.length){ frame.dataset.index = String(next); img.src = imgs[next]; return; }
+  const vi = frame.dataset.vi || img.alt || 'Món ăn';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 675"><defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#fff1f2"/><stop offset="1" stop-color="#fffbeb"/></linearGradient></defs><rect width="900" height="675" rx="42" fill="url(#g)"/><circle cx="450" cy="315" r="150" fill="#fff" stroke="#111827" stroke-opacity=".08" stroke-width="10"/><path d="M285 350h330c-12 72-76 124-165 124s-153-52-165-124z" fill="#dc2626" fill-opacity=".88"/><path d="M330 282c45-42 89-42 134 0 39-34 75-36 106-7" fill="none" stroke="#111827" stroke-width="18" stroke-linecap="round" stroke-opacity=".78"/><text x="450" y="585" text-anchor="middle" font-family="Arial, sans-serif" font-size="46" font-weight="800" fill="#111827">${vi.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</text></svg>`;
+  img.onerror = null;
+  img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+function openImageModal(frame){
+  const img = frame && frame.querySelector('img');
+  if(!img) return;
+  document.getElementById('imageTitle').textContent = img.alt;
+  document.getElementById('imageModalImg').src = img.src;
+  const modal=document.getElementById('imageModal'); const box=document.getElementById('imageBox'); modal.classList.add('open');
+  if(hasAnime()) anime({targets:box, opacity:[0,1], translateY:[16,0], scale:[.98,1], duration:260, easing:'easeOutCubic'});
+}
+function closeImageModal(e){ if(e && e.target && e.target.id !== 'imageModal') return; const modal=document.getElementById('imageModal'); const box=document.getElementById('imageBox'); if(hasAnime()) anime({targets:box, opacity:[1,0], translateY:[0,16], scale:[1,.98], duration:180, easing:'easeInCubic', complete:()=>modal.classList.remove('open')}); else modal.classList.remove('open'); }
+function switchTab(tab){
+  const isFood = tab === 'food';
+  document.getElementById('conversationTab').classList.toggle('active', !isFood);
+  document.getElementById('foodTab').classList.toggle('active', isFood);
+  document.getElementById('tabBtnConversation').classList.toggle('active', !isFood);
+  document.getElementById('tabBtnFood').classList.toggle('active', isFood);
+  setTimeout(()=>document.querySelector('.tabbar').scrollIntoView({behavior:'smooth', block:'start'}), 20);
+}
+function setFoodMode(mode){ foodState.mode=mode; document.getElementById('foodModeLabel').textContent=mode==='nameToImage'?'Name → Image':'Image → Name'; startFoodGame(true); }
+function startFoodGame(manual=false){
+  foodState.locked=false;
+  const current = shuffle(foodItems)[0];
+  const distractors = shuffle(foodItems.filter(x=>x.vi!==current.vi)).slice(0,3);
+  foodState.current=current; foodState.options=shuffle([current,...distractors]);
+  document.getElementById('foodScore').textContent=foodState.score;
+  document.getElementById('foodTopic').textContent=current.cat;
+  document.getElementById('foodLesson').classList.add('hidden');
+  if(foodState.mode==='nameToImage'){
+    document.getElementById('foodQuestion').innerHTML=`Which image is <span style="color:var(--accent)">${current.vi}</span>?`;
+    document.getElementById('foodHint').textContent=`Choose the correct Creative Commons image. English meaning appears after you answer.`;
+    document.getElementById('foodVisual').innerHTML=`<div class="bubble system" style="opacity:1; transform:none; max-width:88%">Look at the 4 images and choose the correct one. Tap ⤢ to enlarge without selecting.</div>`;
+    document.getElementById('foodOptions').innerHTML=foodState.options.map((it,i)=>`<button class="food-option" onclick="answerFood(${i})" data-vi="${it.vi}" data-en="${it.en}">${imgTag(it)}<span class="food-choice-number">Option ${i+1}</span></button>`).join('');
+  } else {
+    document.getElementById('foodQuestion').innerHTML='Tên món này là gì?';
+    document.getElementById('foodHint').textContent='Choose the Vietnamese name. English meaning appears after you answer.';
+    document.getElementById('foodVisual').innerHTML=`${imgTag(current,'large')}<div class="img-caption">Wikimedia Commons / Creative Commons practice image • ${current.cat}</div>`;
+    document.getElementById('foodOptions').innerHTML=foodState.options.map((it,i)=>`<button class="food-option" onclick="answerFood(${i})" data-vi="${it.vi}" data-en="${it.en}"><b>${it.vi}</b></button>`).join('');
+  }
+  animateIn('.food-option',{delay:80}); if(manual) toast('New food question');
+}
+function answerFood(i){
+  if(foodState.locked) return; foodState.locked=true;
+  const picked=foodState.options[i], correct=foodState.current;
+  const buttons=[...document.querySelectorAll('.food-option')];
+  buttons.forEach((b,idx)=>{b.disabled=true; if(foodState.options[idx].vi===correct.vi)b.classList.add('correct'); if(idx===i && picked.vi!==correct.vi)b.classList.add('wrong');});
+  const ok=picked.vi===correct.vi;
+  buttons.forEach((b,idx)=>{
+    const it=foodState.options[idx];
+    if(foodState.mode==='nameToImage'){
+      b.insertAdjacentHTML('beforeend', `<b>${it.vi}</b><small>${it.en}</small>`);
+    } else {
+      b.insertAdjacentHTML('beforeend', `<small>${it.en}<br>${it.cat}</small>`);
+    }
+  });
+  if(ok){ foodState.score+=20; state.score+=10; state.level=1+Math.floor(state.score/100); updateStats(); toast('+20 Food XP'); }
+  else { state.hearts=Math.max(0,state.hearts-1); updateStats(); toast('Try the next one'); }
+  document.getElementById('foodScore').textContent=foodState.score;
+  const lesson=document.getElementById('foodLesson');
+  lesson.innerHTML=`<b>${ok?'✅ Correct!':'❌ Not quite.'}</b><br><b>${correct.vi}</b> = ${correct.en}. Category: ${correct.cat}. Taste words: ${correct.taste}.<br>Useful structure: <b>Món này rất ngon ạ!</b> / <b>${correct.vi} có ngon không?</b><div class="toolbar"><button onclick="startFoodGame(true)">Next Food Question</button></div>`;
+  lesson.classList.remove('hidden'); animateIn('#foodLesson'); pulse(ok?'#foodScore':'#hearts');
+}
+
+init();
+</script>
 </body>
 </html>
